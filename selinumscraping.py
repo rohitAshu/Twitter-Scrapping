@@ -6,7 +6,15 @@ import xml.etree.ElementTree as ET
 
 # Set up Chrome WebDriver
 def scrape_twitter_data(Profile_name):
-    driver = webdriver.Chrome()
+    user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.50 Safari/537.36'
+    options = webdriver.ChromeOptions()
+    options.add_argument('--headless')
+    options.add_argument("--window-size=1920,1080")
+    # options.add_argument(f'user-agent={user_agent}')
+    options.add_argument("--disable-third-party-cookies")
+
+
+    driver = webdriver.Chrome(options=options)
     driver.maximize_window()
 
     driver.get("https://twitter.com/i/flow/login")
