@@ -8,12 +8,12 @@ from selenium.webdriver.common.keys import Keys  # type: ignore
 from time import sleep
 from rest_framework import status
 from .utils import twitterLogin_auth
-from .serializers import TwiiterProfileSerializers
+from .serializers import TwitterProfileSerializers
 import json
 
 
 @api_view(["POST"])
-def get_Tweetes_via_profile_name(request):
+def get_Tweeted_via_profile_name(request):
     """
     Fetches tweets from a Twitter profile given its name.
 
@@ -27,18 +27,19 @@ def get_Tweetes_via_profile_name(request):
     Raises:
         None
     """
-    driver = initialize_driver()
-    serializer = TwiiterProfileSerializers(data=request.data)
-    Profile_name = request.data.get("Profile_name")
+
+    serializer = TwitterProfileSerializers(data=request.data)
+    profile_name = request.data.get("profile_name")
 
     if serializer.is_valid():
+        driver = initialize_driver()
         success, message = twitterLogin_auth(driver)
 
         if success:
             sleep(16)
             try:
                 search_box = driver.find_element(By.XPATH, "//input[@data-testid='SearchBox_Search_Input']")
-                search_box.send_keys(request.data.get("Profile_name"))
+                search_box.send_keys(request.data.get("profile_name"))
                 search_box.send_keys(Keys.ENTER)
                 print("Entered the subject and clicked Successfully !!")
                 sleep(3)
@@ -53,8 +54,7 @@ def get_Tweetes_via_profile_name(request):
                 )
 
             try:
-                people = driver.find_element(By.XPATH,
-                                             "//*[@id='react-root']/div/div/div[2]/main/div/div/div/div[1]/div/div[1]/div[1]/div[2]/nav/div/div[2]/div/div[3]/a/div/div/span")
+                people = driver.find_element(By.XPATH,"//*[@id='react-root']/div/div/div[2]/main/div/div/div/div[1]/div/div[1]/div[1]/div[2]/nav/div/div[2]/div/div[3]/a/div/div/span")
                 people.click()
                 sleep(5)
                 print("Clicked on people Successfully !!")
@@ -68,8 +68,7 @@ def get_Tweetes_via_profile_name(request):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             try:
-                profile = driver.find_element(By.XPATH,
-                                              "//*[@id='react-root']/div/div/div[2]/main/div/div/div/div[1]/div/div[3]/section/div/div/div[1]/div/div/button/div/div[2]/div[1]/div[1]/div/div[1]/a/div/div[1]/span/span[1]")
+                profile = driver.find_element(By.XPATH,"//*[@id='react-root']/div/div/div[2]/main/div/div/div/div[1]/div/div[3]/section/div/div/div[1]/div/div/button/div/div[2]/div[1]/div[1]/div/div[1]/a/div/div[1]/span/span[1]")
                 profile.click()
                 sleep(5)
                 print("Went on profile Man ")
@@ -96,15 +95,14 @@ def get_Tweetes_via_profile_name(request):
                 )
             while True:
                 for article in articles:
-                    user_tag = driver.find_element(By.XPATH,
-                                                   "//*[@id='react-root']/div/div/div[2]/main/div/div/div/div[1]/div/div[3]/div/div/div/div/div[2]").text
+                    user_tag = driver.find_element(By.XPATH,"//*[@id='react-root']/div/div/div[2]/main/div/div/div/div[1]/div/div[3]/div/div/div/div/div[2]").text
 
                     timestamp = driver.find_element(By.XPATH, "//time").get_attribute('datetime')
                     tweet = driver.find_element(By.XPATH, "//div[@data-testid='tweetText']").text
                     reply = driver.find_element(By.CLASS_NAME, "css-1jxf684").text
                     retweet = driver.find_element(By.CLASS_NAME, "css-1jxf684").text
                     data.append({
-                        "Name": Profile_name,
+                        "Name": profile_name,
                         "UserTag": user_tag,
                         "Timestamp": timestamp,
                         "TweetContent": tweet,
@@ -118,7 +116,7 @@ def get_Tweetes_via_profile_name(request):
                         break
                 break
                 # Save data to JSON file
-            with open(f"{Profile_name}.json", "w", encoding='utf-8') as f:
+            with open(f"{profile_name}.json", "w", encoding='utf-8') as f:
                 json.dump(data, f, ensure_ascii=False, indent=4)
             return JsonResponse(
                 {
@@ -140,7 +138,7 @@ def get_Tweetes_via_profile_name(request):
     return JsonResponse(
         {
             "code": status.HTTP_400_BAD_REQUEST,
-            "type": "error",
+            "type": "errobjector",
             "message": serializer.errors,
         },
         status=status.HTTP_400_BAD_REQUEST,

@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup
 import concurrent.futures
 
 
-def getProxies():
+def get_proxies():
     """
     Fetches elite proxy servers from free-proxy-list.net.
 
@@ -62,11 +62,12 @@ def rotateProxy(working_proxies):
 
     Returns:
         None
+        :param working_proxies: 
+        :return: 
     """
     if not working_proxies:
         print("No working proxies found.")
         return
-
     random_proxy = random.choice(working_proxies)
     print(f"Rotating to proxy: {random_proxy}")
 
@@ -78,9 +79,10 @@ def rotateProxy(working_proxies):
         service=ChromeService(ChromeDriverManager().install()),
         options=options,
     )
-    driver.get("http://httpbin.org/ip")
+    driver.get('https://httpbin.org/ip')
     print(driver.find_element(By.TAG_NAME, "body").text)
     driver.quit()
+
 
 def initialize_driver():
     """
@@ -89,8 +91,7 @@ def initialize_driver():
     Returns:
         webdriver.Chrome: A Chrome WebDriver instance.
     """
-    proxies = getProxies()
-    working_proxies = []
+    proxies = get_proxies()
     try:
         with concurrent.futures.ThreadPoolExecutor() as executor:
             results = executor.map(testProxy, proxies)
@@ -110,15 +111,11 @@ def initialize_driver():
         user_agents = []
     options = webdriver.ChromeOptions()
     options.add_argument('--headless')  # Uncomment this line if you want to run in headless mode
-    options.add_argument("--window-size=1920,1080")
-    options.add_argument("--disable-third-party-cookies")
-    default_user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36"
+    options.add_argument('--window-size=1920,1080')
+    options.add_argument('--disable-third-party-cookies')
+    default_user_agent = ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
+                          'Chrome/90.0.4430.212 Safari/537.36')
     user_agent = random.choice(user_agents) if user_agents else default_user_agent
-    options.add_argument(f"--user-agent={user_agent}")
+    options.add_argument(f'--user-agent={user_agent}')
     driver = webdriver.Chrome(options=options)
     return driver
-
-
-
-
-
