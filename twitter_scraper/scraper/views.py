@@ -28,6 +28,15 @@ def get_Tweeted_via_profile_name(request):
         None
     """
 
+
+    # return JsonResponse(
+    #     {
+    #         "code": status.HTTP_400_BAD_REQUEST,
+    #         "type": "error",
+    #         "message": driver,
+    #     },
+    #     status=status.HTTP_400_BAD_REQUEST,
+    # )
     serializer = TwitterProfileSerializers(data=request.data)
     profile_name = request.data.get("Profile_name")
     if serializer.is_valid():

@@ -11,26 +11,17 @@ import concurrent.futures
 
 def get_proxies():
     """
-    Fetches elite proxy servers from free-proxy-list.net.
+    Retrieves a list of proxy server IPs from a file.
 
     Returns:
-        List of elite proxy servers in the format 'ip_address:port'.
+        list: A list of proxy server IPs.
     """
-    try:
-        r = requests.get("https://free-proxy-list.net/")
-        r.raise_for_status()  # Raise HTTPError for bad status codes
-        soup = BeautifulSoup(r.content, "html.parser")
-        table = soup.find("tbody")
-        proxies = []
-        for row in table.find_all("tr"):
-            columns = row.find_all("td")
-            if columns[4].text.strip() == "elite proxy":
-                proxy = f"{columns[0].text}:{columns[1].text}"
-                proxies.append(proxy)
-        return proxies
-    except requests.RequestException as e:
-        print("Error fetching proxies:", e)
-        return []
+    proxies = []
+    success, proxyList = fetchdata_from_file('proxy-server-ips.txt')
+    if success:
+        proxies.extend(proxyList)
+
+    return proxies
 
 
 def testProxy(proxy):
@@ -62,8 +53,8 @@ def rotateProxy(working_proxies):
 
     Returns:
         None
-        :param working_proxies: 
-        :return: 
+        :param working_proxies:
+        :return:
     """
     if not working_proxies:
         print("No working proxies found.")
@@ -92,6 +83,7 @@ def initialize_driver():
         webdriver.Chrome: A Chrome WebDriver instance.
     """
     proxies = get_proxies()
+    # return  proxies
     try:
         with concurrent.futures.ThreadPoolExecutor() as executor:
             results = executor.map(testProxy, proxies)
@@ -108,7 +100,7 @@ def initialize_driver():
             user_agents = file.readlines()
     except Exception as e:
         print("Error reading user_agents.txt:", e)
-        user_agents = []
+    user_agents = []
     options = webdriver.ChromeOptions()
     options.add_argument('--headless')  # Uncomment this line if you want to run in headless mode
     options.add_argument('--window-size=1920,1080')
@@ -119,3 +111,25 @@ def initialize_driver():
     options.add_argument(f'--user-agent={user_agent}')
     driver = webdriver.Chrome(options=options)
     return driver
+
+
+def fetchdata_from_file(file_name):
+    """
+    Read data from a file and return it as a list of strings.
+
+    Args:
+        file_name (str): The name of the file to read from.
+
+    Returns:
+        tuple: A tuple containing a boolean indicating success or failure,
+        and either a list of strings containing the data read from the file,
+        or None if there was an error reading the file.
+    """
+    try:
+        with open(file_name, 'r') as file:
+            user_agents = file.readlines()
+        return True, user_agents  # Success
+    except Exception as e:
+        print("Error reading", file_name, ":", e)
+        return False, None  # Failure
+
