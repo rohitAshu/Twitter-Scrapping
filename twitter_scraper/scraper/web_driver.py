@@ -1,14 +1,11 @@
-from selenium import webdriver
-import random
-import requests
+import concurrent.futures
 import ipaddress
-
-from selenium.webdriver.common.by import By
+import random
+from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
-from bs4 import BeautifulSoup
-import concurrent.futures
 
 
 def get_proxies():
@@ -101,7 +98,7 @@ def initialize_driver():
         print("Error reading user_agents.txt:", e)
     user_agents = []
     options = webdriver.ChromeOptions()
-    options.add_argument('--headless')  # Uncomment this line if you want to run in headless mode
+    # options.add_argument('--headless')  # Uncomment this line if you want to run in headless mode
     options.add_argument('--window-size=1920,1080')
     options.add_argument('--disable-third-party-cookies')
     default_user_agent = ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '

@@ -238,3 +238,104 @@ def fetch_tweets_by_hash_tag(request):
         },
         status=status.HTTP_400_BAD_REQUEST,
     )
+
+
+@api_view(["GET"])
+def Twiiter_treding_hashtag(request):
+    driver = initialize_driver()
+    success, message = twitterLogin_auth(driver)
+    if success:
+        sleep(16)  # Assuming this sleep is needed for Twitter to load properly
+
+        # Click on the Explore button
+        try:
+            explore_btn = driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div[2]/header/div/div/div/div[1]/div[2]/nav/a[2]/div/div[2]/span")
+            explore_btn.click()
+            print('Explore button found and clicked')
+            sleep(5)
+        except NoSuchElementException:
+            return JsonResponse(
+                {
+                    "code": status.HTTP_400_BAD_REQUEST,
+                    "type": "error",
+                    "message": 'Explore button not found',
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Click on the Trending button
+        try:
+            trending_btn = driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div[2]/main/div/div/div/div[1]/div/div[1]/div[1]/div[2]/nav/div/div[2]/div/div[2]/a/div/div/span")
+            trending_btn.click()
+            print('Trending button found and clicked')
+            sleep(5)
+        except NoSuchElementException:
+            return JsonResponse(
+                {
+                    "code": status.HTTP_400_BAD_REQUEST,
+                    "type": "error",
+                    "message": 'Trending button not found',
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Scroll down to load more trending topics
+        last_height = driver.execute_script("return document.body.scrollHeight")
+        while True:
+            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            sleep(2)  # Adjust sleep time as needed
+            new_height = driver.execute_script("return document.body.scrollHeight")
+            if new_height == last_height:
+                break
+            last_height = new_height
+
+        # Find all trending topic elements
+        try:
+            trending_topics_elements = driver.find_elements(By.XPATH, '//*[@data-testid="cellInnerDiv"]')
+            print('Trending topic elements found')
+        except NoSuchElementException:
+            return JsonResponse(
+                {
+                    "code": status.HTTP_400_BAD_REQUEST,
+                    "type": "error",
+                    "message": 'Trending topic elements not found',
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Extract data from trending topic elements
+        trending_topics = []
+        for element in trending_topics_elements:
+            text = element.text.split('\n')
+            if len(text) >= 4:
+                item = {
+                    "id": text[0].strip(),
+                    "category": text[2].split(' · ')[0].strip(),
+                    "type": text[2].split(' · ')[1].strip() if ' · ' in text[2] else "Trending",
+                    "trending": text[3].strip(),
+                    "posts": text[4].strip() if len(text) > 4 else "N/A"
+                }
+                trending_topics.append(item)
+
+        # Return JSON response with trending topics data
+        return JsonResponse(
+            {
+                "code": status.HTTP_200_OK,
+                "type": "success",
+                "message": "Trading Hashtag here",
+                "data": trending_topics
+            },
+            status=status.HTTP_200_OK,
+            json_dumps_params={'indent': 2}
+        )
+
+    return JsonResponse(
+        {
+            "code": status.HTTP_400_BAD_REQUEST,
+            "type": "error",
+            "message": "Twitter Authentication Failed",
+        },
+        status=status.HTTP_400_BAD_REQUEST,
+    )
+
+
