@@ -83,14 +83,14 @@ python3 manage.py migrate
 
 Start the server
 
-Windows:
+**Windows:**
 
 ```bash
 python manage.py runserver
 
 ```
 
-Unix/MacOS/LInux:
+**Unix/MacOS/LLinux:**
 
 ```bash
 python3 manage.py runserver

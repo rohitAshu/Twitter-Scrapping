@@ -1,6 +1,8 @@
 from selenium import webdriver
 import random
 import requests
+import ipaddress
+
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service as ChromeService
@@ -17,14 +19,13 @@ def get_proxies():
         list: A list of proxy server IPs.
     """
     proxies = []
-    success, proxyList = fetchdata_from_file('proxy-server-ips.txt')
-    if success:
-        proxies.extend(proxyList)
+    for _ in range(10):
+        proxies.append(generate_ipv4())
 
     return proxies
 
 
-def testProxy(proxy):
+def test_proxy(proxy):
     """
     Tests the provided proxy by making a request to https://httpbin.org/ip.
 
@@ -34,17 +35,24 @@ def testProxy(proxy):
     Returns:
         str or None: The proxy server if it is working, otherwise returns None.
     """
+
     try:
-        r = requests.get(
-            "https://httpbin.org/ip", proxies={"http": proxy, "https": proxy}, timeout=5
-        )
-        r.raise_for_status()  # Raises HTTPError if the response status code is >= 400
-        return proxy
-    except requests.exceptions.RequestException:
+        # This will create an IPv4 or IPv6 object if the address is valid
+        ip_obj = ipaddress.ip_address(proxy)
+        return ip_obj
+    except ValueError:
         return None
+    # try:
+    #     r = requests.get(
+    #         "https://httpbin.org/ip", proxies={"http": proxy, "https": proxy}, timeout=5
+    #     )
+    #     r.raise_for_status()  # Raises HTTPError if the response status code is >= 400
+    #     return proxy
+    # except requests.exceptions.RequestException:
+    #     return None
 
 
-def rotateProxy(working_proxies):
+def rotate_proxy(working_proxies):
     """
     Rotates to a random working proxy from the list and makes a request to http://httpbin.org/ip.
 
@@ -86,12 +94,12 @@ def initialize_driver():
     # return  proxies
     try:
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            results = executor.map(testProxy, proxies)
+            results = executor.map(test_proxy, proxies)
             working_proxies = [result for result in results if result is not None]
 
         num_working_proxies = len(working_proxies)
         print(f"Found {num_working_proxies} working proxies.")
-        rotateProxy(working_proxies)
+        rotate_proxy(working_proxies)
 
     except Exception as e:
         print("An error occurred during proxy testing:", e)
@@ -113,23 +121,5 @@ def initialize_driver():
     return driver
 
 
-def fetchdata_from_file(file_name):
-    """
-    Read data from a file and return it as a list of strings.
-
-    Args:
-        file_name (str): The name of the file to read from.
-
-    Returns:
-        tuple: A tuple containing a boolean indicating success or failure,
-        and either a list of strings containing the data read from the file,
-        or None if there was an error reading the file.
-    """
-    try:
-        with open(file_name, 'r') as file:
-            user_agents = file.readlines()
-        return True, user_agents  # Success
-    except Exception as e:
-        print("Error reading", file_name, ":", e)
-        return False, None  # Failure
-
+def generate_ipv4():
+    return '.'.join(str(random.randint(0, 255)) for _ in range(4))
