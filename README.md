@@ -94,9 +94,5 @@ Unix/MacOS/LInux:
 
 ```bash
 python3 manage.py runserver
-
-
-## Tech Stack
-
-**Server:** Mysql, Django ,Python 
+```
 
