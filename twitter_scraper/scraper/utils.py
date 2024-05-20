@@ -3,8 +3,6 @@ from selenium.webdriver.common.by import By
 from time import sleep
 from selenium.common.exceptions import NoSuchElementException
 
-# Load environment variables from .env
-
 
 def twitterLogin_auth(driver):
     """
@@ -18,11 +16,11 @@ def twitterLogin_auth(driver):
     sleep(3)
     try:
         username = driver.find_element(By.XPATH, "//input[@name='text']")
-        username.send_keys("d41972")
+        username.send_keys("ExoticaLtd")
         print("Username element found and value sent successfully.")
         pass
     except NoSuchElementException:
-        return False, "username Profile_name = serializers.CharField(required=True)lement not found"
+        return False, "username E    Profile_name = serializers.CharField(required=True)lement not found"
     try:
         next_button = driver.find_element(By.XPATH, "//span[contains(text(),'Next')]")
         next_button.click()
@@ -33,7 +31,7 @@ def twitterLogin_auth(driver):
         return False, "next_button Element not found"
     try:
         password = driver.find_element(By.XPATH, "//input[@name='password']")
-        password.send_keys("syMpEntabLuTeRICNERYlaRmi")
+        password.send_keys("S5Us3/)pT$.H#yy")
         print("Password element found and Password filled Successfully")
     except NoSuchElementException:
         return False, "password Element not found"
@@ -44,3 +42,6 @@ def twitterLogin_auth(driver):
     except NoSuchElementException:
         return False, "log_in Element not found"
     return True, "Twitter Login Successfully"
+
+
+

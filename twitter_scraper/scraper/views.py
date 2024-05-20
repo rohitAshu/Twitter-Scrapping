@@ -27,16 +27,6 @@ def get_Tweeted_via_profile_name(request):
     Raises:
         None
     """
-
-
-    # return JsonResponse(
-    #     {
-    #         "code": status.HTTP_400_BAD_REQUEST,
-    #         "type": "error",
-    #         "message": driver,
-    #     },
-    #     status=status.HTTP_400_BAD_REQUEST,
-    # )
     serializer = TwitterProfileSerializers(data=request.data)
     profile_name = request.data.get("Profile_name")
     if serializer.is_valid():
@@ -128,7 +118,7 @@ def get_Tweeted_via_profile_name(request):
             return JsonResponse(
                 {
                     "code": status.HTTP_200_OK,
-                    "type": "error",
+                    "type": "success",
                     "message": 'Tweets get  SuccessFully ',
                     "data": data
                 },
@@ -160,46 +150,76 @@ def fetch_tweets_by_hash_tag(request):
         success, message = twitterLogin_auth(driver)
         if success:
             try:
-                driver.get(f'https://twitter.com/search?q=%23{hashtags}&src=typed_query')
-                sleep(3)
+                sleep(16)
+                search_box = driver.find_element(By.XPATH, "//input[@data-testid='SearchBox_Search_Input']")
+                search_box.send_keys(hashtags)
+                search_box.send_keys(Keys.ENTER)
+                print("Entered the subject and clicked Successfully !!")
+                sleep(10)
+            except NoSuchElementException:
+                return JsonResponse(
+                    {
+                        "code": status.HTTP_400_BAD_REQUEST,
+                        "type": "error",
+                        "message": 'search_box Element not found',
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            data = []
+            try:
+                articles = driver.find_elements(By.CLASS_NAME, 'css-175oi2r')
+                print('articles Found')
+                # pass
 
-                # Scraping tweets
-                data = []
-                tweets = driver.find_elements(By.XPATH, "//div[@data-testid='tweet']")
-                for tweet in tweets:
-                    user_tag = tweet.find_element(By.XPATH,
-                                                  ".//span[contains(@class, 'css-901oao css-16my406 r-poiln3 r-bcqeeo r-qvutc0')]").text
-                    timestamp = tweet.find_element(By.XPATH, ".//time").get_attribute('datetime')
-                    tweet_content = tweet.find_element(By.XPATH,
-                                                       ".//div[contains(@class, 'css-901oao r-18jsvk2 r-1tl8opc r-a023e6 r-16dba41 r-rjixqe r-bcqeeo r-bnwqim r-qvutc0')]").text
-                    reply = tweet.find_element(By.XPATH, ".//div[@data-testid='reply']").text
-                    retweet = tweet.find_element(By.XPATH, ".//div[@data-testid='retweet']").text
+            except NoSuchElementException:
+                return JsonResponse(
+                    {
+                        "code": status.HTTP_400_BAD_REQUEST,
+                        "type": "error",
+                        "message": 'articles Element not found',
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            while True:
+                for article in articles:
+
+                    timestamp = driver.find_element(By.XPATH, "//time").get_attribute('datetime')
+
+                    tweet = driver.find_element(By.XPATH, "//div[@data-testid='tweetText']").text
+
+                    reply = driver.find_element(By.CLASS_NAME, "css-1jxf684").text
+
+                    retweet = driver.find_element(By.CLASS_NAME, "css-1jxf684").text
+
                     data.append({
-                        "UserTag": user_tag,
+                        "Name": hashtags,
                         "Timestamp": timestamp,
-                        "TweetContent": tweet_content,
+                        "TweetContent": tweet,
                         "Reply": reply,
                         "Retweet": retweet
                     })
+                    driver.execute_script('window.scrollTo(0,document.body.scrollHeight);')
+                    articles = driver.find_elements(By.CLASS_NAME, 'css-175oi2r')
+                    if len(data) > 5:
+                        break
+                break
 
                 # Save data to JSON file
-                with open(f"{hashtags}_tweets.json", "w", encoding='utf-8') as f:
-                    json.dump(data, f, ensure_ascii=False, indent=4)
-                return JsonResponse(
-                    {
-                        "code": status.HTTP_200_OK,
-                        "type": "success",
-                        "message": "Get tweets via this hashtag",
-                        "data": data
-                    },
-                    status=status.HTTP_200_OK,
-                )
-            except Exception as e:
-                print(f"Error scraping Twitter data: {e}")
-                return False
-            finally:
-                if driver:
-                    driver.quit()
+            with open(f"{hashtags}.json", "w", encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=4)
+
+            driver.quit()
+            # return True
+            return JsonResponse(
+                {
+                    "code": status.HTTP_200_OK,
+                    "type": "success",
+                    "message": 'tweet get Successfully',
+                    "data": data
+                },
+                status=status.HTTP_200_OK,
+            )
+
 
         return JsonResponse(
             {
