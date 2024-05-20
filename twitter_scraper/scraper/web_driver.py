@@ -5,6 +5,8 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.common.by import By
+from fake_useragent import UserAgent
+
 from webdriver_manager.chrome import ChromeDriverManager
 
 
@@ -91,19 +93,11 @@ def initialize_driver():
 
     except Exception as e:
         print("An error occurred during proxy testing:", e)
-    try:
-        with open('user_agents.txt', 'r') as file:
-            user_agents = file.readlines()
-    except Exception as e:
-        print("Error reading user_agents.txt:", e)
-    user_agents = []
     options = webdriver.ChromeOptions()
-    # options.add_argument('--headless')  # Uncomment this line if you want to run in headless mode
+    options.add_argument('--headless')  # Uncomment this line if you want to run in headless mode
     options.add_argument('--window-size=1920,1080')
     options.add_argument('--disable-third-party-cookies')
-    default_user_agent = ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
-                          'Chrome/90.0.4430.212 Safari/537.36')
-    user_agent = random.choice(user_agents) if user_agents else default_user_agent
+    user_agent = UserAgent().random
     options.add_argument(f'--user-agent={user_agent}')
     driver = webdriver.Chrome(options=options)
     return driver
