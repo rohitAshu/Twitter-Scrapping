@@ -35,21 +35,12 @@ def test_proxy(proxy):
     Returns:
         str or None: The proxy server if it is working, otherwise returns None.
     """
-
     try:
         # This will create an IPv4 or IPv6 object if the address is valid
         ip_obj = ipaddress.ip_address(proxy)
         return ip_obj
     except ValueError:
         return None
-    # try:
-    #     r = requests.get(
-    #         "https://httpbin.org/ip", proxies={"http": proxy, "https": proxy}, timeout=5
-    #     )
-    #     r.raise_for_status()  # Raises HTTPError if the response status code is >= 400
-    #     return proxy
-    # except requests.exceptions.RequestException:
-    #     return None
 
 
 def rotate_proxy(working_proxies):
