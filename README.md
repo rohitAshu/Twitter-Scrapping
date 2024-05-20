@@ -50,9 +50,9 @@ Install dependencies
 
 ```bash
   pip install -r requirements.txt
-```
+```python manage.py runserver
 
-Then After make a make migrate using the following command
+Then After make a make migrate using the following commandpython manage.py runserver
 
 Windows:
 
@@ -94,9 +94,5 @@ Unix/MacOS/LInux:
 
 ```bash
 python3 manage.py runserver
-
-
-## Tech Stack
-
-**Server:** Mysql, Django ,Python 
+```
 
