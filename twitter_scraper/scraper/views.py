@@ -182,15 +182,10 @@ def fetch_tweets_by_hash_tag(request):
                 )
             while True:
                 for article in articles:
-
                     timestamp = driver.find_element(By.XPATH, "//time").get_attribute('datetime')
-
                     tweet = driver.find_element(By.XPATH, "//div[@data-testid='tweetText']").text
-
                     reply = driver.find_element(By.CLASS_NAME, "css-1jxf684").text
-
                     retweet = driver.find_element(By.CLASS_NAME, "css-1jxf684").text
-
                     data.append({
                         "Name": hashtags,
                         "Timestamp": timestamp,
@@ -203,7 +198,6 @@ def fetch_tweets_by_hash_tag(request):
                     if len(data) > 5:
                         break
                 break
-
                 # Save data to JSON file
             with open(f"{hashtags}.json", "w", encoding='utf-8') as f:
                 json.dump(data, f, ensure_ascii=False, indent=4)
@@ -241,7 +235,17 @@ def fetch_tweets_by_hash_tag(request):
 
 
 @api_view(["GET"])
-def Twiiter_treding_hashtag(request):
+def Twiiter_treding_hashtag():
+    """
+    Fetches the trending hashtags from Twitter.
+
+    This function initializes a WebDriver session, performs Twitter login authentication,
+    clicks on the Explore and Trending buttons, scrolls down to load more trending topics,
+    extracts data from the trending topic elements, and returns a JSON response with the trending topics.
+
+    Returns:
+        JsonResponse: A JSON response containing the trending hashtags.
+    """
     driver = initialize_driver()
     success, message = twitterLogin_auth(driver)
     if success:
@@ -305,6 +309,7 @@ def Twiiter_treding_hashtag(request):
 
         # Extract data from trending topic elements
         trending_topics = []
+
         for element in trending_topics_elements:
             text = element.text.split('\n')
             if len(text) >= 4:
@@ -316,7 +321,6 @@ def Twiiter_treding_hashtag(request):
                     "posts": text[4].strip() if len(text) > 4 else "N/A"
                 }
                 trending_topics.append(item)
-
         # Return JSON response with trending topics data
         return JsonResponse(
             {
