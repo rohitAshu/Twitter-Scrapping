@@ -101,7 +101,7 @@ def initialize_driver():
         print("Error reading user_agents.txt:", e)
     user_agents = []
     options = webdriver.ChromeOptions()
-    # options.add_argument('--headless')  # Uncomment this line if you want to run in headless mode
+    options.add_argument('--headless')  # Uncomment this line if you want to run in headless mode
     options.add_argument('--window-size=1920,1080')
     options.add_argument('--disable-third-party-cookies')
     default_user_agent = ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
