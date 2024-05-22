@@ -1,14 +1,12 @@
 from selenium import webdriver
 import random
-import requests
 import ipaddress
-
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
-from bs4 import BeautifulSoup
-import concurrent.futures
+from fake_useragent import UserAgent
+from selenium.webdriver.common.proxy import Proxy, ProxyType
 
 
 def get_proxies():
@@ -20,36 +18,43 @@ def get_proxies():
     """
     proxies = []
     for _ in range(10):
-        proxies.append(generate_ipv4())
-
+        proxies.append('.'.join(str(random.randint(0, 255)) for _ in range(4)))
     return proxies
 
 
-def test_proxy(proxy):
+def validate_proxies(proxies):
     """
-    Tests the provided proxy by making a request to https://httpbin.org/ip.
+    Validate a list of proxy server IPs.
 
-    Args:
-        proxy (str): The proxy server in the format 'ip_address:port'.
+    Parameters:
+        proxies (list): A list of proxy server IPs to validate.
 
     Returns:
-        str or None: The proxy server if it is working, otherwise returns None.
+        list: A list of validated proxy server IPs.
     """
+    validated_proxies = []
+    for proxy in proxies:
+        if validate_proxy(proxy):
+            validated_proxies.append(proxy)
+    return validated_proxies
 
+
+def validate_proxy(proxy):
+    """
+    Validate a proxy server IP.
+
+    Parameters:
+        proxy (str): The proxy server IP to validate.
+
+    Returns:
+        bool: True if the proxy is valid, False otherwise.
+    """
     try:
         # This will create an IPv4 or IPv6 object if the address is valid
         ip_obj = ipaddress.ip_address(proxy)
-        return ip_obj
+        return ip_obj.version == 4
     except ValueError:
-        return None
-    # try:
-    #     r = requests.get(
-    #         "https://httpbin.org/ip", proxies={"http": proxy, "https": proxy}, timeout=5
-    #     )
-    #     r.raise_for_status()  # Raises HTTPError if the response status code is >= 400
-    #     return proxy
-    # except requests.exceptions.RequestException:
-    #     return None
+        return False
 
 
 def rotate_proxy(working_proxies):
@@ -84,39 +89,23 @@ def rotate_proxy(working_proxies):
 
 
 def initialize_driver():
-    """
-    Initialize a Chrome WebDriver with rotating proxies and a random user agent.
-
-    Returns:
-        webdriver.Chrome: A Chrome WebDriver instance.
-    """
-    proxies = get_proxies()
-    # return  proxies
-    try:
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            results = executor.map(test_proxy, proxies)
-            working_proxies = [result for result in results if result is not None]
-
-        num_working_proxies = len(working_proxies)
-        print(f"Found {num_working_proxies} working proxies.")
-        rotate_proxy(working_proxies)
-
-    except Exception as e:
-        print("An error occurred during proxy testing:", e)
-    try:
-        with open('user_agents.txt', 'r') as file:
-            user_agents = file.readlines()
-    except Exception as e:
-        print("Error reading user_agents.txt:", e)
-    user_agents = []
     options = webdriver.ChromeOptions()
+    print(f"Here is number of  {len(get_proxies())}  proxies.")
+    validated_proxies = validate_proxies(get_proxies())
+    print("Validated Proxies:", validated_proxies)
+    random_proxy_ip = random.choice(validated_proxies)
+    print("this proxy ip is used:", random_proxy_ip)
+    # Proxy Functionality
+    prox = Proxy()
+    prox.proxy_type = ProxyType.MANUAL
+    prox.http = random_proxy_ip
+    prox.httpProxy = random_proxy_ip
+    prox.ssl_proxy = random_proxy_ip
+    capability = webdriver.DesiredCapabilities.CHROME
     options.add_argument('--headless')  # Uncomment this line if you want to run in headless mode
     options.add_argument('--window-size=1920,1080')
     options.add_argument('--disable-third-party-cookies')
-    default_user_agent = ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
-                          'Chrome/90.0.4430.212 Safari/537.36')
-    user_agent = random.choice(user_agents) if user_agents else default_user_agent
-    options.add_argument(f'--user-agent={user_agent}')
+    options.add_argument(f'--user-agent={UserAgent().random}')
     driver = webdriver.Chrome(options=options)
     return driver
 

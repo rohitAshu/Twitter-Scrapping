@@ -1,109 +1,92 @@
-import time
+import json
+from django.utils import timezone
+from time import sleep
 
-from django.shortcuts import render
+from rest_framework import status
 from rest_framework.decorators import api_view
-from django.http import JsonResponse
-from .web_driver import initialize_driver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys  # type: ignore
-from time import sleep
-from .utils import twitterLogin_auth
-from .serializers import TwitterProfileSerializers,TweetHashtagSerializer, TweetUrlSerializer
-import json
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from rest_framework import status
-from django.http import JsonResponse
+from selenium.webdriver.common.keys import Keys
+from .serializers import TwitterProfileSerializers, TweetHashtagSerializer, TweetUrlSerializer
+from .utils import twitterLogin_auth, message_json_response, save_data_in_directory
+from .web_driver import initialize_driver
+
 
 @api_view(["POST"])
 def get_Tweeted_via_profile_name(request):
     """
-    Fetches tweets from a Twitter profile given its name.
+    Retrieves tweets from a Twitter profile via its profile name using Selenium WebDriver.
 
-    Args:
-        request: HTTP request object containing data.
+    Parameters:
+    - request (HttpRequest): The HTTP request object containing data.
 
     Returns:
-        JSON response containing tweets data if successful,
-        otherwise returns an error response.
+    - JsonResponse: A JSON response with the retrieved tweets and status message.
 
-    Raises:
-        None
+    Example usage:
+    ```
+    # POST request to retrieve tweets from a Twitter profile
+    # Request body should contain {"Profile_name": "twitter_handle"}
+    response = get_Tweeted_via_profile_name(request)
+    ```
     """
     serializer = TwitterProfileSerializers(data=request.data)
     profile_name = request.data.get("Profile_name")
-    if serializer.is_valid():
-        driver = initialize_driver()
-        success, message = twitterLogin_auth(driver)
 
+    if serializer.is_valid():
+        # Initialize Selenium WebDriver
+        driver = initialize_driver()
+        # Attempt Twitter login
+        success, message = twitterLogin_auth(driver)
         if success:
             sleep(16)
             try:
+                # Search for the profile name
                 search_box = driver.find_element(By.XPATH, "//input[@data-testid='SearchBox_Search_Input']")
                 search_box.send_keys(profile_name)
                 search_box.send_keys(Keys.ENTER)
                 print("Entered the subject and clicked Successfully !!")
                 sleep(3)
             except NoSuchElementException:
-                return JsonResponse(
-                    {
-                        "code": status.HTTP_400_BAD_REQUEST,
-                        "type": "error",
-                        "message": 'search_box Element not found',
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+                return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', 'search_box Element not found')
 
             try:
-                people = driver.find_element(By.XPATH,"//*[@id='react-root']/div/div/div[2]/main/div/div/div/div[1]/div/div[1]/div[1]/div[2]/nav/div/div[2]/div/div[3]/a/div/div/span")
+                # Click on the 'People' tab
+                people = driver.find_element(By.XPATH,
+                                             "//*[@id='react-root']/div/div/div[2]/main/div/div/div/div[1]/div/div[1]/div[1]/div[2]/nav/div/div[2]/div/div[3]/a/div/div/span")
                 people.click()
                 sleep(5)
                 print("Clicked on people Successfully !!")
             except NoSuchElementException:
-                return JsonResponse(
-                    {
-                        "code": status.HTTP_400_BAD_REQUEST,
-                        "type": "error",
-                        "message": 'people Element not found',
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+                return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', 'people Element not found')
+
             try:
-                profile = driver.find_element(By.XPATH,"//*[@id='react-root']/div/div/div[2]/main/div/div/div/div[1]/div/div[3]/section/div/div/div[1]/div/div/button/div/div[2]/div[1]/div[1]/div/div[1]/a/div/div[1]/span/span[1]")
+                # Click on the profile
+                profile = driver.find_element(By.XPATH,
+                                              "//*[@id='react-root']/div/div/div[2]/main/div/div/div/div[1]/div/div[3]/section/div/div/div[1]/div/div/button/div/div[2]/div[1]/div[1]/div/div[1]/a/div/div[1]/span/span[1]")
                 profile.click()
                 sleep(5)
                 print("Went on profile Man ")
             except NoSuchElementException:
-                return JsonResponse(
-                    {
-                        "code": status.HTTP_400_BAD_REQUEST,
-                        "type": "error",
-                        "message": 'profile Element not found',
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+                return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', 'profile Element not found')
+
             data = []
             try:
+                # Retrieve tweets
                 articles = driver.find_elements(By.CLASS_NAME, 'css-175oi2r')
             except NoSuchElementException:
-                return JsonResponse(
-                    {
-                        "code": status.HTTP_400_BAD_REQUEST,
-                        "type": "error",
-                        "message": 'articles Element not found',
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            while True:
-                for article in articles:
-                    user_tag = driver.find_element(By.XPATH,"//*[@id='react-root']/div/div/div[2]/main/div/div/div/div[1]/div/div[3]/div/div/div/div/div[2]").text
+                return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', 'articles Element not found')
 
+            while True:
+                for _ in articles:
+                    user_tag = driver.find_element(By.XPATH,
+                                                   "//*[@id='react-root']/div/div/div[2]/main/div/div/div/div[1]/div/div[3]/div/div/div/div/div[2]").text
                     timestamp = driver.find_element(By.XPATH, "//time").get_attribute('datetime')
                     tweet = driver.find_element(By.XPATH, "//div[@data-testid='tweetText']").text
                     testid_value = 'reply'
                     reply = driver.find_element(By.XPATH, f'//*[@data-testid="{testid_value}"]').text
-                    retweet =  driver.find_element(By.XPATH, '//button[@data-testid="retweet"]//span[@class="css-1jxf684 r-bcqeeo r-1ttztb7 r-qvutc0 r-poiln3" and @style="text-overflow: unset;"]').text
+                    retweet = driver.find_element(By.XPATH,
+                                                  '//button[@data-testid="retweet"]//span[@class="css-1jxf684 r-bcqeeo r-1ttztb7 r-qvutc0 r-poiln3" and @style="text-overflow: unset;"]').text
                     likes = driver.find_element(By.XPATH,
                                                 '//button[@data-testid="like"]//span[@class="css-1jxf684 r-bcqeeo r-1ttztb7 r-qvutc0 r-poiln3" and @style="text-overflow: unset;"]').text
                     data.append({
@@ -115,42 +98,50 @@ def get_Tweeted_via_profile_name(request):
                         "Retweet": retweet,
                         "Likes": likes
                     })
-
                     driver.execute_script('window.scrollTo(0,document.body.scrollHeight);')
                     if len(data) > 5:
                         break
                 break
-                # Save data to JSON file
-            with open(f"{profile_name}.json", "w", encoding='utf-8') as f:
-                json.dump(data, f, ensure_ascii=False, indent=4)
-            return JsonResponse(
-                {
-                    "code": status.HTTP_200_OK,
-                    "type": "success",
-                    "message": 'Tweets get  SuccessFully ',
-                    "data": data
-                },
-                status=status.HTTP_200_OK,
-            )
-        return JsonResponse(
-            {
-                "code": status.HTTP_400_BAD_REQUEST,
-                "type": "error",
-                "message": "Twitter Authentication Error",
-            },
-            status=status.HTTP_400_BAD_REQUEST,
-        )
-    return JsonResponse(
-        {
-            "code": status.HTTP_400_BAD_REQUEST,
-            "type": "error",
-            "message": serializer.errors,
-        },
-        status=status.HTTP_400_BAD_REQUEST,
-    )
+            # Save data to JSON file
+            save_data_in_directory(f"Json_Response/{timezone.now().date()}/",profile_name, data)
+            return message_json_response(status.HTTP_200_OK, 'success', 'Tweets get SuccessFully', data=data)
+
+        return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', 'Twitter Authentication Error')
+
+    return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', serializer.errors)
+
 
 @api_view(["POST"])
 def fetch_tweets_by_hash_tag(request):
+    """
+    Retrieves tweets based on hashtags using Selenium WebDriver.
+
+    This function performs the following steps:
+    1. Validates the request data using the TweetHashtagSerializer serializer.
+    2. Initializes a Selenium WebDriver instance.
+    3. Logs in to Twitter using authentication.
+    4. Enters the provided hashtag in the Twitter search box.
+    5. Retrieves tweet data including timestamp, tweet content, reply count, retweet count, and like count.
+    6. Saves the tweet data to a JSON file named after the hashtag.
+
+    Parameters:
+    - request (HttpRequest): The HTTP request object containing data.
+
+    Returns:
+    - JsonResponse: A JSON response with the retrieved tweets and status message.
+
+    Example usage:
+    ```
+    # POST request to retrieve tweets based on hashtags
+    # Request body should contain {"hashtags": "your_hashtag"}
+    response = fetch_tweets_by_hash_tag(request)
+    ```
+
+    Possible errors:
+    - If the request data is invalid, returns a JSON response with status code 400 and error details.
+    - If there's an error during Twitter authentication, returns a JSON response with status code 400 and an authentication error message.
+    - If any required element (e.g., search box, articles) is not found, returns a JSON response with status code 400 and error details.
+    """
     serializer = TweetHashtagSerializer(data=request.data)
     hashtags = request.data.get("hashtags")
     if serializer.is_valid():
@@ -165,14 +156,7 @@ def fetch_tweets_by_hash_tag(request):
                 print("Entered the subject and clicked Successfully !!")
                 sleep(10)
             except NoSuchElementException:
-                return JsonResponse(
-                    {
-                        "code": status.HTTP_400_BAD_REQUEST,
-                        "type": "error",
-                        "message": 'search_box Element not found',
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+                return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', 'search_box element not found')
             data = []
             try:
                 articles = driver.find_elements(By.CLASS_NAME, 'css-175oi2r')
@@ -180,20 +164,12 @@ def fetch_tweets_by_hash_tag(request):
                 # pass
 
             except NoSuchElementException:
-                return JsonResponse(
-                    {
-                        "code": status.HTTP_400_BAD_REQUEST,
-                        "type": "error",
-                        "message": 'articles Element not found',
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+                return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', 'articles element not found')
             while True:
                 for article in articles:
                     timestamp = driver.find_element(By.XPATH, "//time").get_attribute('datetime')
                     tweet = driver.find_element(By.XPATH, "//div[@data-testid='tweetText']").text
-                    testid_value = 'reply'
-                    reply = driver.find_element(By.XPATH, f'//*[@data-testid="{testid_value}"]').text
+                    reply = driver.find_element(By.XPATH, f'//*[@data-testid="reply"]').text
                     retweet = driver.find_element(By.XPATH,
                                                   '//button[@data-testid="retweet"]//span[@class="css-1jxf684 r-bcqeeo r-1ttztb7 r-qvutc0 r-poiln3" and @style="text-overflow: unset;"]').text
                     likes = driver.find_element(By.XPATH,
@@ -205,94 +181,67 @@ def fetch_tweets_by_hash_tag(request):
                         "Retweet": retweet,
                         "Likes": likes
                     })
-
                     driver.execute_script('window.scrollTo(0,document.body.scrollHeight);')
-                    articles = driver.find_elements(By.CLASS_NAME, 'css-175oi2r')
+                    driver.find_elements(By.CLASS_NAME, 'css-175oi2r')
                     if len(data) > 5:
                         break
                 break
                 # Save data to JSON file
-            with open(f"{hashtags}.json", "w", encoding='utf-8') as f:
-                json.dump(data, f, ensure_ascii=False, indent=4)
-
+            save_data_in_directory(f"Json_Response/{timezone.now().date()}/",hashtags, data)
             driver.quit()
-            # return True
-            return JsonResponse(
-                {
-                    "code": status.HTTP_200_OK,
-                    "type": "success",
-                    "message": 'tweet get Successfully',
-                    "data": data
-                },
-                status=status.HTTP_200_OK,
-            )
+            return message_json_response(status.HTTP_200_OK, 'success', 'tweet get successfully', data=data)
+        return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', 'Twitter Authentication Failed')
+    return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', serializer.errors)
 
-        return JsonResponse(
-            {
-                "code": status.HTTP_400_BAD_REQUEST,
-                "type": "error",
-                "message": "Twitter Authentication Failed",
-            },
-            status=status.HTTP_400_BAD_REQUEST,
-        )
-
-    return JsonResponse(
-        {
-            "code": status.HTTP_400_BAD_REQUEST,
-            "type": "error",
-            "message": serializer.errors,
-        },
-        status=status.HTTP_400_BAD_REQUEST,
-    )
 
 @api_view(["GET"])
 def Twiiter_treding_hashtag(request):
     """
-    Fetches the trending hashtags from Twitter.
-
-    This function initializes a WebDriver session, performs Twitter login authentication,
-    clicks on the Explore and Trending buttons, scrolls down to load more trending topics,
-    extracts data from the trending topic elements, and returns a JSON response with the trending topics.
-
+    Retrieves trending hashtags from Twitter using Selenium WebDriver.
+    This function performs the following steps:
+    1. Initializes a Selenium WebDriver instance.
+    2. Logs in to Twitter using authentication.
+    3. Clicks on the Explore button.
+    4. Clicks on the Trending button to view trending topics.
+    5. Scrolls down to load more trending topics.
+    6. Extracts data from trending topic elements.
+    7. Returns a JSON response with trending topics data.
+    Parameters:
+    - request (HttpRequest): The HTTP request object.
     Returns:
-        JsonResponse: A JSON response containing the trending hashtags.
+    - JsonResponse: A JSON response with trending hashtags data.
+
+    Example usage:
+    ```
+    # GET request to retrieve trending hashtags from Twitter
+    response = Twitter_trending_hashtag(request)
+    ```
+
+    Possible errors:
+    - If there's an error during Twitter authentication, returns a JSON response with status code 400 and an authentication error message.
+    - If any required element (e.g., explore button, trending topics) is not found, returns a JSON response with status code 400 and error details.
     """
     driver = initialize_driver()
     success, message = twitterLogin_auth(driver)
     if success:
-        sleep(16)  # Assuming this sleep is needed for Twitter to load properly
-
-        # Click on the Explore button
+        sleep(16)
         try:
-            explore_btn = driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div[2]/header/div/div/div/div[1]/div[2]/nav/a[2]/div/div[2]/span")
+            explore_btn = driver.find_element(By.XPATH,
+                                              "/html/body/div[1]/div/div/div[2]/header/div/div/div/div[1]/div[2]/nav/a[2]/div/div[2]/span")
             explore_btn.click()
             print('Explore button found and clicked')
             sleep(5)
         except NoSuchElementException:
-            return JsonResponse(
-                {
-                    "code": status.HTTP_400_BAD_REQUEST,
-                    "type": "error",
-                    "message": 'Explore button not found',
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
+            return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', 'explore  element not found')
         # Click on the Trending button
         try:
-            trending_btn = driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div[2]/main/div/div/div/div[1]/div/div[1]/div[1]/div[2]/nav/div/div[2]/div/div[2]/a/div/div/span")
+            trending_btn = driver.find_element(By.XPATH,
+                                               "/html/body/div[1]/div/div/div[2]/main/div/div/div/div[1]/div/div[1]/div[1]/div[2]/nav/div/div[2]/div/div[2]/a/div/div/span")
             trending_btn.click()
             print('Trending button found and clicked')
             sleep(5)
         except NoSuchElementException:
-            return JsonResponse(
-                {
-                    "code": status.HTTP_400_BAD_REQUEST,
-                    "type": "error",
-                    "message": 'Trending button not found',
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', 'treding  element not found')
 
         # Scroll down to load more trending topics
         last_height = driver.execute_script("return document.body.scrollHeight")
@@ -309,15 +258,7 @@ def Twiiter_treding_hashtag(request):
             trending_topics_elements = driver.find_elements(By.XPATH, '//*[@data-testid="cellInnerDiv"]')
             print('Trending topic elements found')
         except NoSuchElementException:
-            return JsonResponse(
-                {
-                    "code": status.HTTP_400_BAD_REQUEST,
-                    "type": "error",
-                    "message": 'Trending topic elements not found',
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
+            return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', 'trending_topic element not found')
         # Extract data from trending topic elements
         trending_topics = []
 
@@ -333,28 +274,67 @@ def Twiiter_treding_hashtag(request):
                 }
                 trending_topics.append(item)
         # Return JSON response with trending topics data
-        return JsonResponse(
-            {
-                "code": status.HTTP_200_OK,
-                "type": "success",
-                "message": "Trending Hashtag here",
-                "data": trending_topics
-            },
-            status=status.HTTP_200_OK,
-            json_dumps_params={'indent': 2}
-        )
+        save_data_in_directory(f"Json_Response/{timezone.now().date()}/",'trading_data', trending_topics)
+        return message_json_response(status.HTTP_200_OK, 'success', 'trending Hashtag here',
+                                     data=trending_topics)
+    return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', 'twitter authentication failed')
 
-    return JsonResponse(
-        {
-            "code": status.HTTP_400_BAD_REQUEST,
-            "type": "error",
-            "message": "Twitter Authentication Failed",
-        },
-        status=status.HTTP_400_BAD_REQUEST,
-    )
 
 @api_view(["POST"])
 def get_tweets_by_url(request):
+    serializer = TweetUrlSerializer(data=request.data)
+
+    if serializer.is_valid():
+        driver = initialize_driver()
+        post_ids = request.data.get('post_ids')
+        success, message = twitterLogin_auth(driver)
+        if success:
+            sleep(16)
+        data = []
+        for post_id in post_ids:
+            twiiter_url = f"https://x.com/{request.data.get('user_name')}/status/{post_id}"
+            driver.get(twiiter_url)
+            sleep(5)
+
+            try:
+                # Find tweet elements
+                tweet_elements = driver.find_elements(By.CLASS_NAME, 'css-175oi2r')
+            except NoSuchElementException:
+                return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', 'tweet_elements element not found')
+
+
+
+            tweet = driver.find_element(By.XPATH, "//div[@data-testid='tweetText']").text
+            image_url = driver.find_element(By.CSS_SELECTOR, 'div[data-testid="tweetPhoto"] img').get_attribute('src')
+            reply_count = driver.find_element(By.CSS_SELECTOR, 'button[data-testid="reply"]').find_element(By.CSS_SELECTOR,
+                                                                                                           'span[data-testid="app-text-transition-container"] span').text
+            like_count = driver.find_element(By.CSS_SELECTOR, 'button[data-testid="like"]').find_element(By.CSS_SELECTOR,
+                                                                                                         'span[data-testid="app-text-transition-container"] span').text
+            repost_count = driver.find_element(By.CSS_SELECTOR, 'button[data-testid="retweet"]').find_element(
+                By.CSS_SELECTOR, 'span[data-testid="app-text-transition-container"] span').text
+            bookmark_count = driver.find_element(By.CSS_SELECTOR, 'button[data-testid="bookmark"]').find_element(
+                By.CSS_SELECTOR, 'span[data-testid="app-text-transition-container"] span').text
+            driver.execute_script('window.scrollTo(0,document.body.scrollHeight);')
+            timestamp = driver.find_element(By.XPATH, "//time").get_attribute('datetime')
+            views_count = driver.find_element(By.CSS_SELECTOR, 'span.css-1jxf684').text
+            data.append({
+                "username": request.data.get('user_name'),
+                "TweetContent": tweet,
+                "views_count": views_count,
+                "timestamp": timestamp,
+                "content_image": image_url,
+                "reply_count": reply_count,
+                "like_count": like_count,
+                "repost_count": repost_count,
+                "bookmark_count": bookmark_count
+            })
+        save_data_in_directory(f"Json_Response/{timezone.now().date()}/",request.data.get('user_name'), data)
+        return message_json_response(status.HTTP_200_OK, 'error', 'tweets get  successFully' ,data=data)
+    return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', serializer.errors)
+
+
+@api_view(["POST"])
+def get_comments_for_tweets(request):
     serializer = TweetUrlSerializer(data=request.data)
     if serializer.is_valid():
         driver = initialize_driver()
@@ -367,14 +347,8 @@ def get_tweets_by_url(request):
             try:
                 driver.find_elements(By.CLASS_NAME, 'css-175oi2r')
             except NoSuchElementException:
-                return JsonResponse(
-                    {
-                        "code": status.HTTP_400_BAD_REQUEST,
-                        "type": "error",
-                        "message": 'tweet_elements Element not found',
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+                return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', 'tweet_elements  element not found')
+
         data = []
 
         tweet = driver.find_element(By.XPATH, "//div[@data-testid='tweetText']").text
@@ -401,110 +375,6 @@ def get_tweets_by_url(request):
             "repost_count": repost_count,
             "bookmark_count": bookmark_count
         })
-        return JsonResponse(
-            {
-                "code": status.HTTP_200_OK,
-                "type": "success",
-                "message": 'Tweets get  SuccessFully ',
-                "data": data
-            },
-            status=status.HTTP_200_OK,
-        )
-    return JsonResponse(
-        {
-            "code": status.HTTP_400_BAD_REQUEST,
-            "type": "error",
-            "message": serializer.errors,
-        },
-        status=status.HTTP_400_BAD_REQUEST,
-    )
-
-
-@api_view(["POST"])
-def get_comments_for_tweets(request):
-    serializer = TweetUrlSerializer(data=request.data)
-    if serializer.is_valid():
-        driver = initialize_driver()
-        success, message = twitterLogin_auth(driver)
-        if success:
-            sleep(16)
-            twiiter_url = f"https://x.com/{request.data.get('user_name')}/status/{request.data.get('post_id')}"
-            driver.get(twiiter_url)
-            sleep(5)
-            try:
-                driver.find_elements(By.CLASS_NAME, 'css-175oi2r')
-            except NoSuchElementException:
-                return JsonResponse(
-                    {
-                        "code": status.HTTP_400_BAD_REQUEST,
-                        "type": "error",
-                        "message": 'tweet_elements Element not found',
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-        data = []
-        try:
-            post_elemnents = driver.find_element(By.XPATH, '//div[@data-testid="tweetText"]/span')
-            # Trigger the click event
-            post_elemnents.click()
-            sleep(10)
-        except NoSuchElementException:
-                return JsonResponse(
-                    {
-                        "code": status.HTTP_400_BAD_REQUEST,
-                        "type": "error",
-                        "message": 'post_elemnents Element not found',
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-        return JsonResponse(
-                    {
-                        "code": status.HTTP_400_BAD_REQUEST,
-                        "type": "error",
-                        "message": 'Jl;;ll;l; Element not found',
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-
-        # tweet = driver.find_element(By.XPATH, "//div[@data-testid='tweetText']").text
-        # image_url = driver.find_element(By.CSS_SELECTOR, 'div[data-testid="tweetPhoto"] img').get_attribute('src')
-        # reply_count = driver.find_element(By.CSS_SELECTOR, 'button[data-testid="reply"]').find_element(By.CSS_SELECTOR,
-        #                                                                                                'span[data-testid="app-text-transition-container"] span').text
-        # like_count = driver.find_element(By.CSS_SELECTOR, 'button[data-testid="like"]').find_element(By.CSS_SELECTOR,
-        #                                                                                              'span[data-testid="app-text-transition-container"] span').text
-        # repost_count = driver.find_element(By.CSS_SELECTOR, 'button[data-testid="retweet"]').find_element(
-        #     By.CSS_SELECTOR, 'span[data-testid="app-text-transition-container"] span').text
-        # bookmark_count = driver.find_element(By.CSS_SELECTOR, 'button[data-testid="bookmark"]').find_element(
-        #     By.CSS_SELECTOR, 'span[data-testid="app-text-transition-container"] span').text
-        # driver.execute_script('window.scrollTo(0,document.body.scrollHeight);')
-        # timestamp = driver.find_element(By.XPATH, "//time").get_attribute('datetime')
-        # views_count = driver.find_element(By.CSS_SELECTOR, 'span.css-1jxf684').text
-        # data.append({
-        #     "username": request.data.get('user_name'),
-        #     "TweetContent": tweet,
-        #     "views_count": views_count,
-        #     "timestamp": timestamp,
-        #     "content_image": image_url,
-        #     "reply_count": reply_count,
-        #     "like_count": like_count,
-        #     "repost_count": repost_count,
-        #     "bookmark_count": bookmark_count
-        # })
-        # return JsonResponse(
-        #     {
-        #         "code": status.HTTP_200_OK,
-        #         "type": "success",
-        #         "message": 'Tweets get  SuccessFully ',
-        #         "data": data
-        #     },
-        #     status=status.HTTP_200_OK,
-        # )
-    return JsonResponse(
-        {
-            "code": status.HTTP_400_BAD_REQUEST,
-            "type": "error",
-            "message": serializer.errors,
-        },
-        status=status.HTTP_400_BAD_REQUEST,
-    )
+        save_data_in_directory(f"Json_Response/{timezone.now().date()}/",request.data.get('user_name'), data)
+        return message_json_response(status.HTTP_200_OK, 'error', 'tweets get  successFully' ,data=data)
+    return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', serializer.errors)

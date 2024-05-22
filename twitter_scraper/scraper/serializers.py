@@ -11,7 +11,7 @@ class TweetHashtagSerializer(serializers.Serializer):
 
 class TweetUrlSerializer(serializers.Serializer):
     user_name = serializers.CharField(required=True)
-    post_id = serializers.CharField(required=True)  # CharField for string IDs
+    post_ids = serializers.ListField(child=serializers.IntegerField(), required=True)
 
     @staticmethod
     def validate_post_id(value):
