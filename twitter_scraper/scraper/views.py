@@ -282,8 +282,27 @@ def Twiiter_treding_hashtag(request):
 
 @api_view(["POST"])
 def get_tweets_by_url(request):
-    serializer = TweetUrlSerializer(data=request.data)
+    """
+    Retrieves tweet details from URLs specified in the request data.
 
+    This function takes an HTTP request object containing data, validates it using a TweetUrlSerializer, and then initializes a WebDriver using the initialize_driver function. It then extracts the post IDs from the request data and attempts to log in to Twitter using the twitterLogin_auth function.
+
+    If the login is successful, the function iterates through each post ID, visits the corresponding tweet URL, and extracts various details such as tweet content, image URL, reply count, like count, repost count, bookmark count, timestamp, and views count.
+
+    The extracted tweet details are then stored in a list of dictionaries and saved in a directory named with the current date under the 'Json_Response' directory using the save_data_in_directory function.
+
+    Finally, a JSON response containing the extracted tweet details is returned with a success status code (HTTP 200 OK).
+
+    Args:
+        request: An HTTP request object containing data.
+
+    Returns:
+        A JSON response containing tweet details for the specified URLs.
+
+    Raises:
+        NoSuchElementException: If any element on the tweet page is not found.
+    """
+    serializer = TweetUrlSerializer(data=request.data)
     if serializer.is_valid():
         driver = initialize_driver()
         post_ids = request.data.get('post_ids')
@@ -335,46 +354,73 @@ def get_tweets_by_url(request):
 
 @api_view(["POST"])
 def get_comments_for_tweets(request):
+    """
+    Retrieves comments for tweets identified by their post IDs.
+
+    This function takes an HTTP request object containing data, validates it using a TweetUrlSerializer, and then initializes a WebDriver using the initialize_driver function. It then extracts the post IDs from the request data and attempts to log in to Twitter using the twitterLogin_auth function.
+
+    If the login is successful, the function iterates through each post ID, visits the corresponding tweet URL, clicks on the image element (assuming 'tweetPhoto' is the data-testid value for the image), and then collects the text content of elements matching a specific test_id (which is not defined in the provided code).
+
+    The function scrolls through the page to load more content dynamically and collects all unique text content found.
+
+    Once all comments are collected, they are returned as a JSON response with a success status code (HTTP 200 OK).
+
+    Args:
+        request: An HTTP request object containing data.
+
+    Returns:
+        A JSON respons data = []e containing comments for the specified tweets.
+
+    Raises:
+        NoSuchElementException: If the reply element is not found.
+    """
     serializer = TweetUrlSerializer(data=request.data)
     if serializer.is_valid():
         driver = initialize_driver()
+        post_ids = request.data.get('post_ids')
         success, message = twitterLogin_auth(driver)
         if success:
             sleep(16)
-            twiiter_url = f"https://x.com/{request.data.get('user_name')}/status/{request.data.get('post_id')}"
-            driver.get(twiiter_url)
-            sleep(5)
-            try:
-                driver.find_elements(By.CLASS_NAME, 'css-175oi2r')
-            except NoSuchElementException:
-                return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', 'tweet_elements  element not found')
-
         data = []
 
-        tweet = driver.find_element(By.XPATH, "//div[@data-testid='tweetText']").text
-        image_url = driver.find_element(By.CSS_SELECTOR, 'div[data-testid="tweetPhoto"] img').get_attribute('src')
-        reply_count = driver.find_element(By.CSS_SELECTOR, 'button[data-testid="reply"]').find_element(By.CSS_SELECTOR,
-                                                                                                       'span[data-testid="app-text-transition-container"] span').text
-        like_count = driver.find_element(By.CSS_SELECTOR, 'button[data-testid="like"]').find_element(By.CSS_SELECTOR,
-                                                                                                     'span[data-testid="app-text-transition-container"] span').text
-        repost_count = driver.find_element(By.CSS_SELECTOR, 'button[data-testid="retweet"]').find_element(
-            By.CSS_SELECTOR, 'span[data-testid="app-text-transition-container"] span').text
-        bookmark_count = driver.find_element(By.CSS_SELECTOR, 'button[data-testid="bookmark"]').find_element(
-            By.CSS_SELECTOR, 'span[data-testid="app-text-transition-container"] span').text
-        driver.execute_script('window.scrollTo(0,document.body.scrollHeight);')
-        timestamp = driver.find_element(By.XPATH, "//time").get_attribute('datetime')
-        views_count = driver.find_element(By.CSS_SELECTOR, 'span.css-1jxf684').text
-        data.append({
-            "username": request.data.get('user_name'),
-            "TweetContent": tweet,
-            "views_count": views_count,
-            "timestamp": timestamp,
-            "content_image": image_url,
-            "reply_count": reply_count,
-            "like_count": like_count,
-            "repost_count": repost_count,
-            "bookmark_count": bookmark_count
-        })
-        save_data_in_directory(f"Json_Response/{timezone.now().date()}/",request.data.get('user_name'), data)
-        return message_json_response(status.HTTP_200_OK, 'error', 'tweets get  successFully' ,data=data)
+        for post_id in post_ids:
+            twiiter_url = f"https://x.com/{request.data.get('user_name')}/status/{post_id}"
+            driver.get(twiiter_url)
+            print("twitter url open")
+            sleep(5)
+            testid_value = "tweetPhoto"
+            try:
+                reply = driver.find_element(By.XPATH, f'//*[@data-testid="{testid_value}"]')
+                reply.click()
+                print("Click the image Successfully")
+                sleep(10)
+            except NoSuchElementException:
+                return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', 'reply element not found')
+            test_id = 'tweetText'
+
+            try:
+                last_height = driver.execute_script("return document.body.scrollHeight")
+                print('last_height')
+            except Exception as e:
+                return message_json_response(status.HTTP_200_OK, 'success', 'error' ,data={e})
+            while True:
+                try:
+                    elements = driver.find_elements(By.XPATH, f'//*[@data-testid="{test_id}"]')
+                    print('elements part mil gya')
+                except NoSuchElementException:
+                    return message_json_response(status.HTTP_400_BAD_REQUEST, 'success', 'elements components is not found')
+                print("while loop k andr aa gya ")
+                all_texts = set()  # Use a set to avoid duplicates
+                for element in elements:
+                    all_texts.add(element.text)
+                driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+                sleep(2)  # Adjust the sleep time as needed
+                new_height = driver.execute_script("return document.body.scrollHeight")
+                if new_height == last_height:
+                        break
+                last_height = new_height
+            data.append({
+                        "comments": list(all_texts),
+                    })
+        return message_json_response(status.HTTP_200_OK, 'success', 'tweets get  successFully' ,data=data)
     return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', serializer.errors)

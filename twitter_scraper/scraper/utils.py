@@ -11,7 +11,7 @@ import json
 USER_CREDENTIALS = [
     {"username": "ExoticaLtd", "password": "S5Us3/)pT$.H#yy"},
     {"username": "kR4285512683720", "password": "Kr@200020"},
-    {"username": "RakeshVerma", "password": "RakeshVerma@123"},
+    # {"username": "RakeshVerma", "password": "RakeshVerma@123"},
     # Add more user credentials as needed
 ]
 
@@ -43,7 +43,7 @@ def twitterLogin_auth(driver):
         next_button = driver.find_element(By.XPATH, "//span[contains(text(),'Next')]")
         next_button.click()
         print("Next button element found and clicked successfully.")
-        sleep(10)
+        sleep(5)
         pass
     except NoSuchElementException:
         return False, "next_button Element not found"
