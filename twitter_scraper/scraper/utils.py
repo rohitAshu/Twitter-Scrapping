@@ -15,10 +15,12 @@ USER_CREDENTIALS = [
     # Add more user credentials as needed
 ]
 
+
 def type_slowly(element, text, delay=0.1):
     for char in text:
         element.send_keys(char)
         sleep(delay)
+
 
 def twitterLogin_auth(driver):
     """
@@ -72,7 +74,6 @@ def twitterLogin_auth(driver):
         return False, "Log in button element not found"
 
     return True, "Twitter login successful"
-
 
 
 # Example usage
