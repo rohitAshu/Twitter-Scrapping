@@ -7,8 +7,10 @@ def setup():
     def setUp(self):
         self.client = Client()
 
+
 class GetTweetsTestCase(TestCase):
     setup()
+
     def test_get_tweets_success(self):
         print("Enter in test case ========================================")
         # Define a sample profile name
@@ -30,8 +32,8 @@ class GetTweetsTestCase(TestCase):
 
         # Check if the response data is not empty
         self.assertTrue(response.json()["data"])
-        print("get profile---------------------------------------------------------------------------------------------pass")
-
+        print(
+            "get profile---------------------------------------------------------------------------------------------pass")
 
     def test_invalid_input(self):
         # Define invalid request data (missing Profile_name)
@@ -45,11 +47,14 @@ class GetTweetsTestCase(TestCase):
 
         # Check if the response contains the expected error message
         self.assertEqual(response.json()["type"], "error")
-        self.assertIn("Profile_name", response.json()["message"])  # Assuming serializer error messages include field names
+        self.assertIn("Profile_name",
+                      response.json()["message"])  # Assuming serializer error messages include field names
         print("---------------------------------------------------------------------------------------------fail")
+
 
 class FetchTweetsByHashtagTestCase(TestCase):
     setup()
+
     def test_fetch_tweets_success(self):
         # Define a sample hashtag
         hashtag = "#PakistanBackstabsRussia"
@@ -89,6 +94,7 @@ class FetchTweetsByHashtagTestCase(TestCase):
 
 class TwitterTrendingHashtagTestCase(TestCase):
     setup()
+
     def test_get_trending_hashtags_success(self):
         # Send a GET request to the API endpoint
         response = self.client.get("/twitter/api/v1/get-trending-hashtag/")
@@ -104,8 +110,10 @@ class TwitterTrendingHashtagTestCase(TestCase):
         self.assertTrue(response.json()["data"])
         print("get trending hashtag---------------------------------------------------------------------pass")
 
+
 class GetTweetsByIdTestCase(TestCase):
     setup()
+
     def test_get_tweets_success(self):
         # Define a sample request data
         request_data = {
@@ -151,6 +159,7 @@ class GetTweetsByIdTestCase(TestCase):
 
 class GetCommentsForTweetsTestCase(TestCase):
     setup()
+
     def test_get_comments_success(self):
         # Define a sample request data
         request_data = {
@@ -159,7 +168,8 @@ class GetCommentsForTweetsTestCase(TestCase):
         }
 
         # Send a POST request to the API endpoint
-        response = self.client.post("/twitter/api/v1/get-comments-for-tweet/", data=json.dumps(request_data), content_type="application/json")
+        response = self.client.post("/twitter/api/v1/get-comments-for-tweet/", data=json.dumps(request_data),
+                                    content_type="application/json")
 
         # Check if the response status code is 200 (OK)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -178,7 +188,8 @@ class GetCommentsForTweetsTestCase(TestCase):
         invalid_request_data = {}
 
         # Send a POST request with invalid data
-        response = self.client.post("/twitter/api/v1/get-comments-for-tweet/", data=json.dumps(invalid_request_data), content_type="application/json")
+        response = self.client.post("/twitter/api/v1/get-comments-for-tweet/", data=json.dumps(invalid_request_data),
+                                    content_type="application/json")
 
         # Check if the response status code is 400 (Bad Request)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -189,4 +200,3 @@ class GetCommentsForTweetsTestCase(TestCase):
         self.assertIn("post_ids", response.json()["message"])
         print("Get comments for tweets - invalid input case passed")
         print("get comment by id---------------------------------------------------------------------fail")
-
