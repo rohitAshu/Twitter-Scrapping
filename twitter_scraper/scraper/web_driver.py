@@ -85,7 +85,7 @@ def rotate_proxy(working_proxies):
     print(f"Rotating to proxy: {random_proxy}")
 
     options = Options()
-    # options.add_argument("--headless")
+    options.add_argument("--headless")
     options.add_argument(f"--proxy-server={random_proxy}")
 
     driver = webdriver.Chrome(

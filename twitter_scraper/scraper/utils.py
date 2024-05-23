@@ -12,9 +12,10 @@ from functools import wraps
 
 # List of user credentials
 USER_CREDENTIALS = [
-    {"username": "ExoticaLtd", "password": "S5Us3/)pT$.H#yy"},
-    {"username": "kR4285512683720", "password": "Kr@200020"},
-    {"username": "RakeshVerma", "password": "RakeshVerma@123"},
+    # {"username": "ExoticaLtd", "password": "S5Us3/)pT$.H#yy"},
+    # {"username": "kR4285512683720", "password": "Kr@200020"},
+    # {"username": "RakeshVerma", "password": "RakeshVerma@123"},
+    {"username": "rohita51719", "password": "Ontario@123"},
     # Add more user credentials as needed
 ]
 

@@ -1,6 +1,8 @@
 import json
 from django.utils import timezone
 from time import sleep
+import time
+import random
 
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -8,8 +10,11 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from .serializers import TwitterProfileSerializers, TweetHashtagSerializer, TweetUrlSerializer
-from .utils import twitterLogin_auth, message_json_response, save_data_in_directory
+from .utils import twitterLogin_auth, message_json_response, save_data_in_directory, random_sleep
 from .web_driver import initialize_driver
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import StaleElementReferenceException
 
 
 @api_view(["POST"])
@@ -39,14 +44,14 @@ def get_Tweeted_via_profile_name(request):
         # Attempt Twitter login
         success, message = twitterLogin_auth(driver)
         if success:
-            sleep(16)
+            random_sleep()
             try:
                 # Search for the profile name
                 search_box = driver.find_element(By.XPATH, "//input[@data-testid='SearchBox_Search_Input']")
                 search_box.send_keys(profile_name)
                 search_box.send_keys(Keys.ENTER)
                 print("Entered the subject and clicked Successfully !!")
-                sleep(3)
+                random_sleep()
             except NoSuchElementException:
                 return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', 'search_box Element not found')
 
@@ -55,20 +60,34 @@ def get_Tweeted_via_profile_name(request):
                 people = driver.find_element(By.XPATH,
                                              "//*[@id='react-root']/div/div/div[2]/main/div/div/div/div[1]/div/div[1]/div[1]/div[2]/nav/div/div[2]/div/div[3]/a/div/div/span")
                 people.click()
-                sleep(5)
+                random_sleep()
                 print("Clicked on people Successfully !!")
             except NoSuchElementException:
                 return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', 'people Element not found')
 
+        # print("Preparing to click on Profile.")
+        # retries = 0
+        # max_retries=3
+        # while retries < max_retries:
             try:
+                # # Wait for the element to be present
+                WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.XPATH,
+                                              "//*[@id='react-root']/div/div/div[2]/main/div/div/div/div[1]/div/div[3]/section/div/div/div[1]/div/div/button/div/div[2]/div[1]/div[1]/div/div[1]/a/div/div[1]/span/span[1]")))
+        
                 # Click on the profile
                 profile = driver.find_element(By.XPATH,
                                               "//*[@id='react-root']/div/div/div[2]/main/div/div/div/div[1]/div/div[3]/section/div/div/div[1]/div/div/button/div/div[2]/div[1]/div[1]/div/div[1]/a/div/div[1]/span/span[1]")
                 profile.click()
-                sleep(5)
-                print("Went on profile Man ")
+                random_sleep()
+                print("Profile CLicked.")
+                # break  # Exit the loop if successful
             except NoSuchElementException:
                 return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', 'profile Element not found')
+            
+            except StaleElementReferenceException:
+                # If the element is stale, re-locate it and try again
+                print("Element is stale. A retry should be made......")
+                # retries += 1
 
             data = []
             try:
@@ -149,14 +168,14 @@ def fetch_tweets_by_hash_tag(request):
         success, message = twitterLogin_auth(driver)
         if success:
             try:
-                sleep(16)
+                random_sleep()
                 search_box = driver.find_element(By.XPATH, "//input[@data-testid='SearchBox_Search_Input']")
                 search_box.send_keys(hashtags)
                 search_box.send_keys(Keys.ENTER)
                 print("Entered the subject and clicked Successfully !!")
-                sleep(10)
+                random_sleep()
             except NoSuchElementException:
-                return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', 'search_box element not found')
+                return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', 'search_box element not found, what is going on!!')
             data = []
             try:
                 articles = driver.find_elements(By.CLASS_NAME, 'css-175oi2r')
@@ -224,13 +243,14 @@ def Twiiter_treding_hashtag(request):
     driver = initialize_driver()
     success, message = twitterLogin_auth(driver)
     if success:
-        sleep(16)
+        random_sleep()
         try:
+            WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.XPATH,"/html/body/div[1]/div/div/div[2]/header/div/div/div/div[1]/div[2]/nav/a[2]/div/div[2]/span")))
             explore_btn = driver.find_element(By.XPATH,
                                               "/html/body/div[1]/div/div/div[2]/header/div/div/div/div[1]/div[2]/nav/a[2]/div/div[2]/span")
             explore_btn.click()
             print('Explore button found and clicked')
-            sleep(5)
+            random_sleep()
         except NoSuchElementException:
             return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', 'explore  element not found')
         # Click on the Trending button
@@ -239,7 +259,7 @@ def Twiiter_treding_hashtag(request):
                                                "/html/body/div[1]/div/div/div[2]/main/div/div/div/div[1]/div/div[1]/div[1]/div[2]/nav/div/div[2]/div/div[2]/a/div/div/span")
             trending_btn.click()
             print('Trending button found and clicked')
-            sleep(5)
+            random_sleep()
         except NoSuchElementException:
             return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', 'treding  element not found')
 
@@ -247,7 +267,7 @@ def Twiiter_treding_hashtag(request):
         last_height = driver.execute_script("return document.body.scrollHeight")
         while True:
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            sleep(2)  # Adjust sleep time as needed
+            random_sleep()  # Adjust sleep time as needed
             new_height = driver.execute_script("return document.body.scrollHeight")
             if new_height == last_height:
                 break
@@ -289,12 +309,12 @@ def get_tweets_by_url(request):
         post_ids = request.data.get('post_ids')
         success, message = twitterLogin_auth(driver)
         if success:
-            sleep(16)
+            random_sleep()
         data = []
         for post_id in post_ids:
             twiiter_url = f"https://x.com/{request.data.get('user_name')}/status/{post_id}"
             driver.get(twiiter_url)
-            sleep(5)
+            random_sleep()
 
             try:
                 # Find tweet elements
@@ -340,10 +360,10 @@ def get_comments_for_tweets(request):
         driver = initialize_driver()
         success, message = twitterLogin_auth(driver)
         if success:
-            sleep(16)
+            random_sleep()
             twiiter_url = f"https://x.com/{request.data.get('user_name')}/status/{request.data.get('post_id')}"
             driver.get(twiiter_url)
-            sleep(5)
+            random_sleep()
             try:
                 driver.find_elements(By.CLASS_NAME, 'css-175oi2r')
             except NoSuchElementException:
