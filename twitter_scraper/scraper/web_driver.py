@@ -76,7 +76,7 @@ def rotate_proxy(working_proxies):
     print(f"Rotating to proxy: {random_proxy}")
 
     options = Options()
-    options.add_argument("--headless")
+    # options.add_argument("--headless")
     options.add_argument(f"--proxy-server={random_proxy}")
 
     driver = webdriver.Chrome(
@@ -102,10 +102,24 @@ def initialize_driver():
     prox.httpProxy = random_proxy_ip
     prox.ssl_proxy = random_proxy_ip
     capability = webdriver.DesiredCapabilities.CHROME
-    options.add_argument('--headless')  # Uncomment this line if you want to run in headless mode
-    options.add_argument('--window-size=1920,1080')
+    # options.add_argument('--headless')  # Uncomment this line if you want to run in headless mode
+    # options.add_argument('--window-size=1920,1080')
+   
+    # Randomize window size
+    width = random.randint(800, 1920)
+    height = random.randint(600, 1080)
+    window_size = f'{width},{height}'
+    options.add_argument(f'--window-size={window_size}')
+    # Print the selected window size
+    print(f"Window Size: {window_size}")
+
     options.add_argument('--disable-third-party-cookies')
-    options.add_argument(f'--user-agent={UserAgent().random}')
+    
+    # Generate a random user agent
+    user_agent = UserAgent().random
+    options.add_argument(f'--user-agent={user_agent}')
+    # Print the selected user agent
+    print(f"User Agent: {user_agent}")
     driver = webdriver.Chrome(options=options)
     return driver
 

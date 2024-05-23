@@ -2,11 +2,14 @@ import os
 import random
 from selenium.webdriver.common.by import By
 from time import sleep
+import time
 from selenium.common.exceptions import NoSuchElementException
 from django.http import JsonResponse
 from typing import Optional, Dict
 from rest_framework import status
 import json
+from functools import wraps
+
 # List of user credentials
 USER_CREDENTIALS = [
     {"username": "ExoticaLtd", "password": "S5Us3/)pT$.H#yy"},
@@ -14,6 +17,12 @@ USER_CREDENTIALS = [
     {"username": "RakeshVerma", "password": "RakeshVerma@123"},
     # Add more user credentials as needed
 ]
+
+
+def random_sleep(min_time=1, max_time=10):
+    sleep_time = random.uniform(min_time, max_time)
+    print(f"--> Now sleeping for {sleep_time:.2f} seconds")
+    time.sleep(sleep_time)
 
 
 def twitterLogin_auth(driver):
@@ -30,35 +39,46 @@ def twitterLogin_auth(driver):
     password_value = credentials['password']
 
     driver.get('https://twitter.com/i/flow/login')
-    sleep(10)
+    random_sleep()
     try:
         username = driver.find_element(By.XPATH, "//input[@name='text']")
+        print("Username element found.")
+        random_sleep()
         username.send_keys(username_value)
-        print("Username element found and value sent successfully.")
+        print("Username element value sent successfully with value =",username_value)
+        random_sleep()
 
         pass
     except NoSuchElementException:
         return False, "username E    Profile_name = serializers.CharField(required=True)lement not found"
     try:
         next_button = driver.find_element(By.XPATH, "//span[contains(text(),'Next')]")
+        print("Next button element found.")
+        random_sleep()
         next_button.click()
-        print("Next button element found and clicked successfully.")
-        sleep(10)
+        print("Next button element clicked successfully.")
+        random_sleep()        
         pass
     except NoSuchElementException:
         return False, "next_button Element not found"
     try:
         password = driver.find_element(By.XPATH, "//input[@name='password']")
+        print("Password element found")
+        random_sleep()
         password.send_keys(password_value)
-        print("Password element found and value sent successfully.")
+        print("Password element value sent successfully with password =",password_value)
+        random_sleep()
     except NoSuchElementException:
         return False, "password Element not found"
     try:
         log_in = driver.find_element(By.XPATH, "//span[contains(text(),'Log in')]")
+        print("Log in button found.")
+        random_sleep()
         log_in.click()
-        print("Log in button found and clicked successfully.")
+        print("Log in button clicked successfully.")
+        random_sleep()        
     except NoSuchElementException:
-        return False, "log_injson_dumps_params={'indent': 2} Element not found"
+        return False, "log_injson_dumps_params={'indent': 2} Element not found."
     return True, "Twitter Login Successfully"
 
 
