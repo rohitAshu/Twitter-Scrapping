@@ -1,73 +1,192 @@
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from time import sleep
-from django.http import JsonResponse
+from django.test import TestCase, Client
+from rest_framework import status
 import json
 
-user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36"
-options = webdriver.ChromeOptions()
-options.add_argument(f'user-agent={user_agent}')
-options.add_argument("--window-size=1920,1080")
-options.add_argument("--disable-third-party-cookies")
 
-driver = webdriver.Chrome(options=options)
-driver.get("https://twitter.com/i/flow/login")
+def setup():
+    def setUp(self):
+        self.client = Client()
 
-sleep(3)
-username = driver.find_element(By.XPATH, "//input[@name='text']")
-username.send_keys("ExoticaLtd")
-print("Username filled Successfully")
+class GetTweetsTestCase(TestCase):
+    setup()
+    def test_get_tweets_success(self):
+        print("Enter in test case ========================================")
+        # Define a sample profile name
+        profile_name = "Modi"
+        print(profile_name)
 
-next_button = driver.find_element(By.XPATH, "//span[contains(text(),'Next')]")
-next_button.click()
-print("Next Clicked Successfully")
+        # Define a sample request data
+        request_data = {"Profile_name": profile_name}
 
-sleep(6)
-password = driver.find_element(By.XPATH, "//input[@name='password']")
-password.send_keys("S5Us3/)pT$.H#yy")
+        # Send a POST request to the API endpoint
+        response = self.client.post("/twitter/api/v1/get-profile/", data=request_data)
 
-print("Password filled Successfully")
+        # Check if the response status code is 200 (OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-log_in = driver.find_element(By.XPATH, "//span[contains(text(),'Log in')]")
-log_in.click()
-print("Log in clicked Successfully")
+        # Check if the response contains the expected message and data
+        self.assertEqual(response.json()["type"], "success")
+        self.assertEqual(response.json()["message"], "Tweets get  SuccessFully ")
 
-sleep(10)
+        # Check if the response data is not empty
+        self.assertTrue(response.json()["data"])
+        print("get profile---------------------------------------------------------------------------------------------pass")
 
-explore_btn = driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div[2]/header/div/div/div/div[1]/div[2]/nav/a[2]/div/div[2]/span")
-explore_btn.click()
-sleep(5)
-tradding_btn = driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div[2]/main/div/div/div/div[1]/div/div[1]/div[1]/div[2]/nav/div/div[2]/div/div[2]/a/div/div/span")
-tradding_btn.click()
-sleep(5)
 
-trending_elements = []
-testid_value = "cellInnerDiv"
-elements = driver.find_elements(By.XPATH, f'//*[@data-testid="{testid_value}"]')
+    def test_invalid_input(self):
+        # Define invalid request data (missing Profile_name)
+        invalid_request_data = {}
 
-trending_topics = []
+        # Send a POST request with invalid data
+        response = self.client.post("/twitter/api/v1/get-profile/", data=invalid_request_data)
 
-for element in elements:
-    text = element.text.split('\n')
-    if len(text) >= 4:
-        item = {
-            "id": text[0].strip(),
-            "category": text[2].split(' · ')[0].strip(),
-            "type": text[2].split(' · ')[1].strip() if ' · ' in text[2] else "Trending",
-            "trending": text[3].strip(),
-            "posts": text[4].strip() if len(text) > 4 else "N/A"
+        # Check if the response status code is 400 (Bad Request)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # Check if the response contains the expected error message
+        self.assertEqual(response.json()["type"], "error")
+        self.assertIn("Profile_name", response.json()["message"])  # Assuming serializer error messages include field names
+        print("---------------------------------------------------------------------------------------------fail")
+
+class FetchTweetsByHashtagTestCase(TestCase):
+    setup()
+    def test_fetch_tweets_success(self):
+        # Define a sample hashtag
+        hashtag = "#PakistanBackstabsRussia"
+
+        # Define a sample request data
+        request_data = {"hashtags": hashtag}
+
+        # Send a POST request to the API endpoint
+        response = self.client.post("/twitter/api/v1/get-tweet-hashtag/", data=request_data)
+
+        # Check if the response status code is 200 (OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Check if the response contains the expected message and data
+        self.assertEqual(response.json()["type"], "success")
+        self.assertEqual(response.json()["message"], "tweet get Successfully")
+
+        # Check if the response data is not empty
+        self.assertTrue(response.json()["data"])
+        print("get tweet by hashtag-----------------------------------------------------------------------pass")
+
+    def test_invalid_input(self):
+        # Define invalid request data (missing hashtags)
+        invalid_request_data = {}
+
+        # Send a POST request with invalid data
+        response = self.client.post("/twitter/api/v1/get-tweet-hashtag/", data=invalid_request_data)
+
+        # Check if the response status code is 400 (Bad Request)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # Check if the response contains the expected error message
+        self.assertEqual(response.json()["type"], "error")
+        self.assertIn("hashtags", response.json()["message"])  # Assuming serializer error messages include field names
+        print("get tweet by hashtag-----------------------------------------------------------------------fail")
+
+
+class TwitterTrendingHashtagTestCase(TestCase):
+    setup()
+    def test_get_trending_hashtags_success(self):
+        # Send a GET request to the API endpoint
+        response = self.client.get("/twitter/api/v1/get-trending-hashtag/")
+
+        # Check if the response status code is 200 (OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Check if the response contains the expected message and data
+        self.assertEqual(response.json()["type"], "success")
+        self.assertEqual(response.json()["message"], "Trending Hashtag here")
+
+        # Check if the response data is not empty
+        self.assertTrue(response.json()["data"])
+        print("get trending hashtag---------------------------------------------------------------------pass")
+
+class GetTweetsByIdTestCase(TestCase):
+    setup()
+    def test_get_tweets_success(self):
+        # Define a sample request data
+        request_data = {
+            "user_name": "narendramodi",
+            "post_ids": [1793170649688514579, 1792644927052001747]
         }
-        trending_topics.append(item)
 
-# Convert to JSON format
-json_output = json.dumps(trending_topics, indent=4)
+        # Send a POST request to the API endpoint with JSON data
+        response = self.client.post(
+            "/twitter/api/v1/get-tweets-by-id/",
+            data=json.dumps(request_data),
+            content_type="application/json"
+        )
 
-print(json_output)
+        # Check if the response status code is 200 (OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Check if the response contains the expected message and data
+        self.assertEqual(response.json()["type"], "error")
+        self.assertEqual(response.json()["message"], "tweets get  successFully")
+
+        # Check if the response data is not empty
+        self.assertTrue(response.json()["data"])
+        print("get tweet by id---------------------------------------------------------------------pass")
+
+    def test_invalid_input(self):
+        # Define invalid request data (missing user_name)
+        invalid_request_data = {
+            "post_ids": [123456, 789012]
+        }
+
+        # Send a POST request with invalid data
+        response = self.client.post("/twitter/api/v1/get-tweets-by-id/", data=invalid_request_data)
+
+        # Check if the response status code is 400 (Bad Request)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # Check if the response contains the expected error message
+        self.assertEqual(response.json()["type"], "error")
+        self.assertIn("user_name", response.json()["message"])  # Assuming serializer error messages include field names
+        print("get tweet by id---------------------------------------------------------------------fail")
 
 
+class GetCommentsForTweetsTestCase(TestCase):
+    setup()
+    def test_get_comments_success(self):
+        # Define a sample request data
+        request_data = {
+            "user_name": "narendramodi",
+            "post_ids": [1793170649688514579, 1792644927052001747]
+        }
 
+        # Send a POST request to the API endpoint
+        response = self.client.post("/twitter/api/v1/get-comments-for-tweet/", data=json.dumps(request_data), content_type="application/json")
 
+        # Check if the response status code is 200 (OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+        # Check if the response contains the expected message and data
+        self.assertEqual(response.json()["type"], "success")
+        self.assertEqual(response.json()["message"], "tweets get successfully")
 
+        # Check if the response data is not empty
+        self.assertTrue(response.json()["data"])
+        print("Get comments for tweets - success case passed")
+        print("get comment by id---------------------------------------------------------------------pass")
+
+    def test_invalid_input(self):
+        # Define invalid request data (missing user_name and post_ids)
+        invalid_request_data = {}
+
+        # Send a POST request with invalid data
+        response = self.client.post("/twitter/api/v1/get-comments-for-tweet/", data=json.dumps(invalid_request_data), content_type="application/json")
+
+        # Check if the response status code is 400 (Bad Request)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # Check if the response contains the expected error message
+        self.assertEqual(response.json()["type"], "error")
+        self.assertIn("user_name", response.json()["message"])
+        self.assertIn("post_ids", response.json()["message"])
+        print("Get comments for tweets - invalid input case passed")
+        print("get comment by id---------------------------------------------------------------------fail")
 

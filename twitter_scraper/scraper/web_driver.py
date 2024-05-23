@@ -94,7 +94,7 @@ def initialize_driver():
     except Exception as e:
         print("An error occurred during proxy testing:", e)
     options = webdriver.ChromeOptions()
-    options.add_argument('--headless')  # Uncomment this line if you want to run in headless mode
+    # options.add_argument('--headless')  # Uncomment this line if you want to run in headless mode
     options.add_argument('--window-size=1920,1080')
     options.add_argument('--disable-third-party-cookies')
     user_agent = UserAgent().random
@@ -104,4 +104,7 @@ def initialize_driver():
 
 
 def generate_ipv4():
+    """
+    Gernate IP adress
+    """
     return '.'.join(str(random.randint(0, 255)) for _ in range(4))
