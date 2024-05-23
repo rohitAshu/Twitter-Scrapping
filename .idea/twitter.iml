@@ -4,6 +4,8 @@
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/.venv" />
       <excludeFolder url="file://$MODULE_DIR$/.venv1" />
+      <excludeFolder url="file://$MODULE_DIR$/env" />
+      <excludeFolder url="file://$MODULE_DIR$/env1" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.12 (Twitter-Scrapping Using DRF)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
@@ -13,7 +15,7 @@
     <option name="modifyBaseFiles" value="true" />
   </component>
   <component name="PyDocumentationSettings">
-    <option name="format" value="PLAIN" />
-    <option name="myDocStringFormat" value="Plain" />
+    <option name="format" value="GOOGLE" />
+    <option name="myDocStringFormat" value="Google" />
   </component>
 </module>
