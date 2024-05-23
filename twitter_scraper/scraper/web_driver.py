@@ -7,7 +7,16 @@ from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
 from fake_useragent import UserAgent
 from selenium.webdriver.common.proxy import Proxy, ProxyType
+import requests
 
+def print_proxy_location(proxy_ip):
+    url = f"https://ipinfo.io/{proxy_ip}/json"
+    response = requests.get(url)
+    if response.status_code == 200:
+        data = response.json()
+        print("Proxy IP Location: Country=",data.get('country'),", Region=",data.get('region'),", City=",data.get('city'))
+    else:
+        print("Failed to retrieve location information for the proxy IP.")
 
 def get_proxies():
     """
@@ -101,6 +110,7 @@ def initialize_driver():
     prox.http = random_proxy_ip
     prox.httpProxy = random_proxy_ip
     prox.ssl_proxy = random_proxy_ip
+    print_proxy_location(random_proxy_ip)
     capability = webdriver.DesiredCapabilities.CHROME
     # options.add_argument('--headless')  # Uncomment this line if you want to run in headless mode
     # options.add_argument('--window-size=1920,1080')
