@@ -17,7 +17,7 @@ from .serializers import TwitterProfileSerializers, TweetHashtagSerializer, Twee
 from .utils import twitterLogin_auth, message_json_response, save_data_in_directory, random_sleep
 from .web_driver import initialize_driver
 
-
+MAX_THREAD_COUNT=5
 MAX_EXCEPTION_RETRIES = 2
 
 def print_current_thread():
@@ -117,7 +117,7 @@ def get_Tweeted_via_profile_name(request):
     profile_name = request.data.get("Profile_name")
     if serializer.is_valid():
         # Use ThreadPoolExecutor to run the scrape_profile_tweets function in a separate thread
-        with ThreadPoolExecutor(max_workers=5) as executor:
+        with ThreadPoolExecutor(max_workers=MAX_THREAD_COUNT) as executor:
             future = executor.submit(scrape_profile_tweets, profile_name, 0)
             result = future.result()
         return result
@@ -183,11 +183,26 @@ def scrape_hashtag_tweets(hashtags,retry_count):
 
 @api_view(["POST"])
 def fetch_tweets_by_hash_tag(request):
+    """
+    Fetch tweets by hashtag.
+
+    This endpoint accepts a POST request with hashtags in the request data, 
+    validates the data using TweetHashtagSerializer, and uses a 
+    ThreadPoolExecutor to run the scrape_hashtag_tweets function in a separate 
+    thread to fetch tweets associated with the provided hashtags.
+
+    Args:
+        request: The HTTP request object containing the hashtags in the request data.
+
+    Returns:
+        A JSON response containing the result of the scrape_hashtag_tweets function 
+        if the request data is valid, or an error message if the data is invalid.
+    """
     serializer = TweetHashtagSerializer(data=request.data)
     hashtags = request.data.get("hashtags")
     if serializer.is_valid():
         # Use ThreadPoolExecutor to run the scrape_hashtag_tweets function in a separate thread
-        with ThreadPoolExecutor(max_workers=5) as executor:
+        with ThreadPoolExecutor(max_workers=MAX_THREAD_COUNT) as executor:
             future = executor.submit(scrape_hashtag_tweets, hashtags, 0)
             result = future.result()
         return result
@@ -260,7 +275,7 @@ def get_trending_tweets(request):
     """
     
     # Use ThreadPoolExecutor to run the scrape_trending_hashtags function in a separate thread
-    with ThreadPoolExecutor(max_workers=5) as executor:
+    with ThreadPoolExecutor(max_workers=MAX_THREAD_COUNT) as executor:
         # Submit the scrape_trending_hashtags function with the request data as argument
         future = executor.submit(scrape_trending_hashtags, request, 0)
         
@@ -388,7 +403,7 @@ def get_comments_for_tweets(request):
     """
 
     # Use ThreadPoolExecutor to run the scrape_comments_for_tweets function in a separate thread
-    with ThreadPoolExecutor(max_workers=5) as executor:
+    with ThreadPoolExecutor(max_workers=MAX_THREAD_COUNT) as executor:
         # Submit the scrape_comments_for_tweets function to the executor with the request object as argument
         future = executor.submit(scrape_comments_for_tweets, request, 0)
         
@@ -518,7 +533,7 @@ def get_tweets_by_url(request):
     """
 
     # Use ThreadPoolExecutor to run the scrape_tweets_by_url function in a separate thread
-    with ThreadPoolExecutor(max_workers=5) as executor:
+    with ThreadPoolExecutor(max_workers=MAX_THREAD_COUNT) as executor:
         # Submit the scrape_tweets_by_url function to the executor with the request object as argument
         future = executor.submit(scrape_tweets_by_url, request, 0)
         
