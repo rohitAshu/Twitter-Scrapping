@@ -18,7 +18,7 @@ from .utils import twitterLogin_auth, message_json_response, save_data_in_direct
 from .web_driver import initialize_driver
 
 MAX_THREAD_COUNT=5
-MAX_EXCEPTION_RETRIES = 2
+MAX_EXCEPTION_RETRIES = 3
 
 def print_current_thread():
     current_thread = threading.current_thread()
@@ -316,6 +316,9 @@ def scrape_comments_for_tweets(request,retry_count):
             # Add a random sleep for realistic behavior
             random_sleep()
 
+        if not success:
+            return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', 'Twitter Authentication Failed')
+
         # Initialize an empty list to store the scraped data
         data = []
 
@@ -444,6 +447,9 @@ def scrape_tweets_by_url(request,retry_count):
         if success:
             # Introduce a random sleep to simulate human-like behavior
             random_sleep()
+        
+        if not success:
+            return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', 'Twitter Authentication Failed')
 
         # Initialize an empty list to store scraped tweet data
         data = []
@@ -535,7 +541,7 @@ def get_tweets_by_url(request):
     # Use ThreadPoolExecutor to run the scrape_tweets_by_url function in a separate thread
     with ThreadPoolExecutor(max_workers=MAX_THREAD_COUNT) as executor:
         # Submit the scrape_tweets_by_url function to the executor with the request object as argument
-        future = executor.submit(scrape_tweets_by_url, request, 0)
+        future = executor.submit(scrape_tweets_by_url, request, 1)
         
         # Wait for the function to complete and retrieve the result
         result = future.result()
