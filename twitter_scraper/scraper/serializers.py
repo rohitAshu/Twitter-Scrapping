@@ -4,7 +4,7 @@ Module containing serializers for Twitter profiles, hashtags, and tweet URLs.
 
 from rest_framework import serializers
 
-class TwitterProfileSerializer(serializers.Serializer):
+class TwitterProfileSerializers(serializers.Serializer):
     """
     Serializer for Twitter profiles.
     """
