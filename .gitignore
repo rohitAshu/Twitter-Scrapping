@@ -4,3 +4,4 @@
 /twitter_scraper/scraper/migrations
 /twitter_scraper/scraper/__pycache__/
 /twitter_scraper/Json_Response/
+/.env
