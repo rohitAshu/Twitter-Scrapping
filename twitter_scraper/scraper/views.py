@@ -42,6 +42,7 @@ def retry_Exception(recalling_method_name,any_generic_parameter,retry_count,exce
 def scrape_profile_tweets(profile_name,retry_count):
     print_current_thread()
     driver = initialize_driver()
+    print(f'Web Driver initialized successfully...')
     
     # Authenticate with Twitter
     success, message = twitterLogin_auth(driver)

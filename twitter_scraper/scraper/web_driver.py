@@ -8,6 +8,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from fake_useragent import UserAgent
 from selenium.webdriver.common.proxy import Proxy, ProxyType
 import requests
+from selenium.webdriver.chrome.service import Service
 
 def print_proxy_location(proxy_ip):
     url = f"https://ipinfo.io/{proxy_ip}/json"
@@ -130,7 +131,32 @@ def initialize_driver():
     options.add_argument(f'--user-agent={user_agent}')
     # Print the selected user agent
     print(f"User Agent: {user_agent}")
-    driver = webdriver.Chrome(options=options)
+    # driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()),options=options)
+    # driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()),options=options)
+    
+    
+    
+    options.add_argument("--headless")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-gpu")
+    # options.add_argument("--remote-debugging-port=9222")
+    options.add_argument("--disable-software-rasterizer")
+    # options.add_argument("--disable-extensions")
+    options.add_argument("--disable-features=NetworkService,NetworkServiceInProcess")
+    # options.add_argument("--disable-dev-shm-usage")
+    # options.add_argument("--disable-setuid-sandbox")
+    options.add_argument("--disable-software-rasterizer")
+    # options.add_argument("--start-maximized")
+    options.add_argument("--disable-features=VizDisplayCompositor")
+    options.add_argument("--disable-features=VizHitTest")
+    # options.add_argument("--disable-features=RendererCodeIntegrity")
+
+    # Initialize the Chrome driver
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    
+    
+    
     return driver
 
 

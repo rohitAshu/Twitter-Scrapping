@@ -9,13 +9,14 @@ from typing import Optional, Dict
 from rest_framework import status
 import json
 from functools import wraps
+import traceback
 
 # List of user credentials
 USER_CREDENTIALS = [
     {"username": "exoticaltd33742", "password": "1996@Rakesh"},
     # {"username": "kR4285512683720", "password": "Kr@200020"},
     # {"username": "RakeshVerma", "password": "RakeshVerma@123"},
-    # {"username": "rohita51719", "password": "Ontario@123"},
+    {"username": "rohita51719", "password": "Ontario@123"},
     # Add more user credentials as needed
 ]
 
@@ -39,8 +40,14 @@ def twitterLogin_auth(driver):
     username_value = credentials['username']
     password_value = credentials['password']
 
-    driver.get('https://twitter.com/i/flow/login')
-    random_sleep()
+    try:
+        print("Getting twitter login page.... https://twitter.com/i/flow/login")
+        driver.get('https://twitter.com/i/flow/login')
+        random_sleep()
+    except Exception as e:
+        traceback.print_exc()
+        return False, "Error while getting Twitter Login page!!"
+
     try:
         username = driver.find_element(By.XPATH, "//input[@name='text']")
         print("Username element found.")
