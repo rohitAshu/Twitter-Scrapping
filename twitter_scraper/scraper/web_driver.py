@@ -8,6 +8,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from fake_useragent import UserAgent
 from selenium.webdriver.common.proxy import Proxy, ProxyType
 import requests
+import undetected_chromedriver as uc
 
 
 def print_proxy_location(proxy_ip):
@@ -108,10 +109,11 @@ def rotate_proxy(working_proxies):
     options.add_argument("--headless")
     options.add_argument(f"--proxy-server={random_proxy}")
 
-    driver = webdriver.Chrome(
-        service=ChromeService(ChromeDriverManager().install()),
-        options=options,
-    )
+    # driver = webdriver.Chrome(
+    #     service=ChromeService(ChromeDriverManager().install()),
+    #     options=options,
+    # )
+    driver = uc.Chrome(headless=True,use_subprocess=False)  # this is untective chrome driver
     driver.get('https://httpbin.org/ip')
     print("----------------------------------------------------------------------------------------------------hhtpd://httpbin.org/ip")
     print(driver.find_element(By.TAG_NAME, "body").text)
