@@ -10,8 +10,92 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import NoSuchElementException
 
 USER_CREDENTIALS = [
-    {"username": "ExoticaLtd","email":"webbdeveloper24@gmail.com", "password": "S5Us3/)pT$.H#yy"},
-    {"username": "demetria63800", "email": "pifoga@mailinator.com", "password": "3TVNhFa2wJfhYq0"},
+    {
+        "full name": "Arthur Austin",
+        "username": "MaxwellNoe40221",
+        "email": "zukinonu@mailinator.com",
+        "password": "qZEa5u7GTr8dD3KuReu25HvA9"
+    },
+    {
+        "full name": "Melvin Barber",
+        "username": "MelvinBarb10693",
+        "email": "zavow@mailinator.com",
+        "password": "EF7T6TJwZnE9fakzJLiRfRFDNJuL"
+    },
+    {
+        "full name": "Mariam Park",
+        "username": "MariamPark98427",
+        "email": "gipo@mailinator.com",
+        "password": "Tb5dB5DYBDoboCjLUCDWyADKgevm"
+    },
+    {
+        "full name": "Anita",
+        "username": "Anita4099963550",
+        "email": "aneetaexoticait@gmail.com",
+        "password": "Aneeta@123"
+    },
+    {
+        "full name": "Sunny",
+        "username": "Sunny634164",
+        "email": "sunnyexoticait@gmail.com",
+        "password": "Sunny@123"
+    },
+    {
+        "full name": "rohitexoticait",
+        "username": "rohitexoticait",
+        "email": "rohitexoticait@gmail.com",
+        "password": "asdf123@"
+    },
+    {
+        "full name": "akhilexoticait",
+        "username": "akhilexoticait",
+        "email": "akhilexoticait@gmail.com",
+        "password": "asdf123@"
+    },
+    {
+        "full name": "rimikaexoticait",
+        "username": "rimikaexoticait",
+        "email": "rimikaexoticait@gmail.com",
+        "password": "asdf123@"
+    },
+    {
+        "full name": "mamtaexoticait",
+        "username": "mamtaexoticait",
+        "email": "mamtaexoticait@gmail.com",
+        "password": "asdf123@"
+    },
+    {
+        "full name": "ExoticaBheem",
+        "username": "B51962Bheem",
+        "email": "bheem.singh@exoticaitsolutions.com",
+        "password": "2UwPWXMT4woa1rgaon9B"
+    },{
+        "full name": "ExoticaLtd",
+        "username": "ExoticaLtd",
+        "email": "webbdeveloper24@gmail.com",
+        "password": "S5Us3/)pT$.H#yy"
+    },{
+        "full name": "demetria63800",
+        "username": "demetria63800",
+        "email": "pifoga@mailinator.com",
+        "password": "3TVNhFa2wJfhYq0"
+    },{
+        "full name": "rohita51719",
+        "username": "rohita51719",
+        "email": "pifoga@mailinator.com",
+        "password": "Ontario@123"
+    },{
+        "full name": "RAJANGURJAR1606",
+        "username": "RAJANGURJAR1606",
+        "email": "rajangurjar1606@mailinator.com",
+        "password": "RAAZgujjar@123"
+    },{
+        "full name": "VivekKhata63896",
+        "username": "VivekKhata63896",
+        "email": "vivekkhata63896@mailinator.com",
+        "password": "asdf123@"
+    }
+
 ]
 
 
