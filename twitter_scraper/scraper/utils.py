@@ -74,7 +74,6 @@ def twitterLogin_auth(driver):
     driver.get('https://twitter.com/i/flow/login')
     sleep(10)
     try:
-        # Locate the username input field and type the username
         username = driver.find_element(By.XPATH, "//input[@name='text']")
         random_sleep()
         actions = ActionChains(driver)
@@ -83,7 +82,6 @@ def twitterLogin_auth(driver):
         print("Username element found and value sent successfully.")
     except NoSuchElementException:
         return False, "Username element not found"
-
     try:
         # Locate and click the "Next" button
         next_button = driver.find_element(By.XPATH, "//span[contains(text(),'Next')]")
