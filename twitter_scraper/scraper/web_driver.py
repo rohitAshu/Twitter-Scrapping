@@ -152,7 +152,7 @@ def initialize_driver():
     prox.ssl_proxy = random_proxy_ip
     # zxcxz = print_proxy_location(random_proxy_ip)
     # return zxcxz
-    # options.add_argument('--headless')  # Uncomment this line if you want to run in headless mode
+    options.add_argument('--headless')  # Uncomment this line if you want to run in headless mode
     # Randomize window size
     width = random.randint(800, 1920)
     height = random.randint(600, 1080)

@@ -14,7 +14,6 @@ from .utils import twitterLogin_auth, message_json_response, save_data_in_direct
 from .web_driver import initialize_driver
 from time import sleep
 
-
 def print_current_thread():
     """
     Print the name of the current thread.
@@ -47,7 +46,6 @@ def retry_Exception(recalling_method_name,any_generic_parameter,retry_count,exce
                     # Return a JSON response with an error message if retry attempts are exhausted
                     print(f'!!!!!!!!!!!!! All the retry attempts exhausted. Throwing error now........')
                     return message_json_response(status.HTTP_404_NOT_FOUND, 'error', 'Element not found')
-
 
 # Function to scrape tweets from a profile
 def scrape_profile_tweets(profile_name, retry_count):
@@ -170,77 +168,111 @@ def get_tweeted_via_profile_name(request):
     return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', serializer.errors)
 
 
-# Function to scrape tweets based on hashtags
-def scrape_hashtag_tweets(hashtags):
+def scrape_hashtag_tweets(hashtags, retry_count):
     print_current_thread()
     driver = initialize_driver()
 
+
+    def checkScroll():
+        total_scroll_height = driver.execute_script('return document.body.scrollHeight')
+    # Retrieve the current scroll position
+        current_scroll_position = driver.execute_script('return window.pageYOffset || document.documentElement.scrollTop')
+
+    # Compare the two values to check if the scroll is at the bottom
+        if current_scroll_position + driver.execute_script('return window.innerHeight') >= total_scroll_height:
+            print("The scroll is at the bottom of the page.")
+            sleep(5)
+            data = scrapData()
+            return data
+
+        else:
+            driver.execute_script('window.scrollTo(0,document.body.scrollHeight);')
+            sleep(6)
+            checkScroll()
+
+    def tweet_content_exists(tweets, tweet_content):
+        for tweet in tweets:
+            if tweet.get("TweetContent") == tweet_content:
+                return True
+        return False
+    data = []
+    def scrapData():
+        print('sahil')
+        articles = driver.find_elements(By.XPATH, "//div[@class='css-175oi2r' and @data-testid='cellInnerDiv']")
+        a = 1
+        while True:
+            for article in articles:
+                print(a)
+                a = a + 1
+                # user_tag = article.find_element(By.XPATH, "//*[@id='react-root']/div/div/div[2]/main/div/div/div/div[1]/div/div[3]/div/div/div/div/div[2]").text
+                timestamp = article.find_element(By.XPATH, "//time").get_attribute('datetime')
+                tweet = article.find_element(By.XPATH, "//div[@data-testid='tweetText']").text
+                reply = article.find_element(By.XPATH, f'//*[@data-testid="reply"]').text
+                retweet = article.find_element(By.XPATH, '//button[@data-testid="retweet"]//span').text
+                likes = article.find_element(By.XPATH, '//button[@data-testid="like"]//span').text
+                if tweet_content_exists(data, tweet):
+                    print("The tweet content exists.")
+                    print("data if : ", data)
+                else:
+                    data.append({
+                        "Name": hashtags,
+                        # "UserTag": user_tag,
+                        "Timestamp": timestamp,
+                        "TweetContent": tweet,
+                        "Reply": reply,
+                        "Retweet": retweet,
+                        "Likes": likes
+                    })
+                    print("data else : ", data)
+                    print("length : ", len(data))
+            break
+        total_scroll_height = driver.execute_script('return document.body.scrollHeight')
+        # Retrieve the current scroll position
+        current_scroll_position = driver.execute_script('return window.pageYOffset || document.documentElement.scrollTop')
+
+        # Compare the two values to check if the scroll is at the bottom
+        if current_scroll_position + driver.execute_script('return window.innerHeight') >= total_scroll_height:
+            print("The scroll is at the bottom of the page.")
+            sleep(5)
+            save_data_in_directory(f"Json_Response/{timezone.now().date()}/", hashtags, data)
+            return data
+
+        else:
+            driver.execute_script("window.scrollBy(0, 200);")
+            sleep(5)
+            scrapData()
     # Authenticate with Twitter
     success, message = twitterLogin_auth(driver)
     if not success:
-        return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', 'Twitter Authentication Failed')
-
+        return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', 'Twitter Authentication Error')
+    
     try:
         random_sleep()
         search_box = driver.find_element(By.XPATH, "//input[@data-testid='SearchBox_Search_Input']")
         search_box.send_keys(hashtags)
         search_box.send_keys(Keys.ENTER)
-        sleep(20)
-    except NoSuchElementException:
-        return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', 'search_box element not found')
-    except StaleElementReferenceException:
-        # If the element is stale, re-locate it and try again
-        print("Element is stale. Retrying...")
+        print(f'Search box data entered')
+        random_sleep()
+        data = scrapData()
+        sleep(2)
+        driver.quit()
+        return message_json_response(status.HTTP_200_OK, 'success', 'Tweets retrieved successfully', data=data)
 
-    data = []
-    try:
-        articles = driver.find_elements(By.CLASS_NAME, 'css-175oi2r')
-    except NoSuchElementException:
-        return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', 'articles element not found')
-    except StaleElementReferenceException:
-        # If the element is stale, re-locate it and try again
-        print("Element is stale. Retrying...")
-
-    try:
-        # Scrape tweets until the desired number is reached or no more tweets are available
-        while True:
-            for article in articles:
-                timestamp = driver.find_element(By.XPATH, "//time").get_attribute('datetime')
-                tweet = driver.find_element(By.XPATH, "//div[@data-testid='tweetText']").text
-                reply = driver.find_element(By.XPATH, f'//*[@data-testid="reply"]').text
-                retweet = driver.find_element(By.XPATH, '//button[@data-testid="retweet"]//span').text
-                likes = driver.find_element(By.XPATH, '//button[@data-testid="like"]//span').text
-                data.append({
-                    "Timestamp": timestamp,
-                    "TweetContent": tweet,
-                    "Reply": reply,
-                    "Retweet": retweet,
-                    "Likes": likes
-                })
-                driver.execute_script('window.scrollTo(0,document.body.scrollHeight);')
-                if len(data) > 5:
-                    break
-            break
-    except NoSuchElementException:
-        return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', 'articles element not found')
-    except StaleElementReferenceException:
-        # If the element is stale, re-locate it and try again
-        print("Element is stale. Retrying...")
-
-    # Save the scraped data to a directory
-    save_data_in_directory(f"Json_Response/{timezone.now().date()}/", hashtags, data)
-    driver.quit()
-    return message_json_response(status.HTTP_200_OK, 'success', 'Tweets retrieved successfully', data=data)
+    except NoSuchElementException as e:
+        if 'driver' in locals():
+            driver.quit()
+        return retry_Exception(scrape_hashtag_tweets,hashtags,retry_count,type(e).__name__)
 
 
 @api_view(["POST"])
 def fetch_tweets_by_hash_tag(request):
+    retry_count = 0
     serializer = TweetHashtagSerializer(data=request.data)
     hashtags = request.data.get("hashtags")
     if serializer.is_valid():
         # Use ThreadPoolExecutor to run the scrape_hashtag_tweets function in a separate thread
         with ThreadPoolExecutor(max_workers=5) as executor:
-            future = executor.submit(scrape_hashtag_tweets, hashtags)
+            future = executor.submit(scrape_hashtag_tweets, hashtags, retry_count)
             result = future.result()
         return result
     return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', serializer.errors)
@@ -425,29 +457,101 @@ def scrape_comments_for_tweets(request):
     return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', serializer.errors)
 
 
+# @api_view(["POST"])
+# def get_comments_for_tweets(request):
+#     """
+#     Endpoint to asynchronously scrape comments for tweets from Twitter.
+
+#     Args:
+#         request (HttpRequest): The HTTP request object containing the tweet data.
+
+#     Returns:
+#         JSONResponse: A JSON response containing the scraped comments data or error message.
+#     """
+
+#     # Use ThreadPoolExecutor to run the scrape_comments_for_tweets function in a separate thread
+#     with ThreadPoolExecutor(max_workers=5) as executor:
+#         # Submit the scrape_comments_for_tweets function to the executor with the request object as argument
+#         future = executor.submit(scrape_comments_for_tweets, request)
+
+#         # Wait for the function to complete and retrieve the result
+#         result = future.result()
+
+#     # Return the result obtained from scraping comments
+#     return result
+
+
+
 @api_view(["POST"])
 def get_comments_for_tweets(request):
     """
-    Endpoint to asynchronously scrape comments for tweets from Twitter.
+    Retrieves comments for tweets identified by their post IDs.
+
+    This function takes an HTTP request object containing data, validates it using a TweetUrlSerializer, and then initializes a WebDriver using the initialize_driver function. It then extracts the post IDs from the request data and attempts to log in to Twitter using the twitterLogin_auth function.
+
+    If the login is successful, the function iterates through each post ID, visits the corresponding tweet URL, clicks on the image element (assuming 'tweetPhoto' is the data-testid value for the image), and then collects the text content of elements matching a specific test_id (which is not defined in the provided code).
+
+    The function scrolls through the page to load more content dynamically and collects all unique text content found.
+
+    Once all comments are collected, they are returned as a JSON response with a success status code (HTTP 200 OK).
 
     Args:
-        request (HttpRequest): The HTTP request object containing the tweet data.
+        request: An HTTP request object containing data.
 
     Returns:
-        JSONResponse: A JSON response containing the scraped comments data or error message.
+        A JSON respons data = []e containing comments for the specified tweets.
+
+    Raises:
+        NoSuchElementException: If the reply element is not found.
     """
+    serializer = TweetUrlSerializer(data=request.data)
+    if serializer.is_valid():
+        driver = initialize_driver()
+        post_ids = request.data.get('post_ids')
+        success, message = twitterLogin_auth(driver)
+        if success:
+            sleep(16)
+        data = []
 
-    # Use ThreadPoolExecutor to run the scrape_comments_for_tweets function in a separate thread
-    with ThreadPoolExecutor(max_workers=5) as executor:
-        # Submit the scrape_comments_for_tweets function to the executor with the request object as argument
-        future = executor.submit(scrape_comments_for_tweets, request)
+        for post_id in post_ids:
+            twiiter_url = f"https://x.com/{request.data.get('user_name')}/status/{post_id}"
+            driver.get(twiiter_url)
+            print("twitter url open")
+            sleep(5)
+            testid_value = "tweetPhoto"
+            try:
+                reply = driver.find_element(By.XPATH, f'//*[@data-testid="{testid_value}"]')
+                reply.click()
+                print("Click the image Successfully")
+                sleep(10)
+            except NoSuchElementException:
+                return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', 'reply element not found')
+            test_id = 'tweetText'
 
-        # Wait for the function to complete and retrieve the result
-        result = future.result()
-
-    # Return the result obtained from scraping comments
-    return result
-
+            try:
+                last_height = driver.execute_script("return document.body.scrollHeight")
+                print('last_height')
+            except Exception as e:
+                return message_json_response(status.HTTP_200_OK, 'success', 'error' ,data={e})
+            while True:
+                try:
+                    elements = driver.find_elements(By.XPATH, f'//*[@data-testid="{test_id}"]')
+                except NoSuchElementException:
+                    return message_json_response(status.HTTP_400_BAD_REQUEST, 'success', 'elements components is not found')
+                all_texts = set()  # Use a set to avoid duplicates
+                for element in elements:
+                    all_texts.add(element.text)
+                driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+                sleep(2)  # Adjust the sleep time as needed
+                new_height = driver.execute_script("return document.body.scrollHeight")
+                if new_height == last_height:
+                        break
+                last_height = new_height
+            data.append({
+                        "comments": list(all_texts),
+                    })
+        return message_json_response(status.HTTP_200_OK, 'success', 'tweets get  successFully' ,data=data)
+    return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', serializer.errors)
 
 def scrape_tweets_by_url(request):
     """
