@@ -1,14 +1,13 @@
-from selenium import webdriver
-import random
 import ipaddress
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service as ChromeService
-from webdriver_manager.chrome import ChromeDriverManager
-from fake_useragent import UserAgent
-from selenium.webdriver.common.proxy import Proxy, ProxyType
+import random
+
 import requests
 import undetected_chromedriver as uc
+from fake_useragent import UserAgent
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.proxy import Proxy, ProxyType
 
 
 def print_proxy_location(proxy_ip):
