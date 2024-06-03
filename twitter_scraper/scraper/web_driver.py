@@ -114,6 +114,7 @@ def rotate_proxy(working_proxies):
     #     options=options,
     # )
     driver = uc.Chrome(headless=True,use_subprocess=False)  # this is untective chrome driver
+    # driver = uc.Chrome(use_subprocess=False)  # this is untective chrome driver
     driver.get('https://httpbin.org/ip')
     print("----------------------------------------------------------------------------------------------------hhtpd://httpbin.org/ip")
     print(driver.find_element(By.TAG_NAME, "body").text)

@@ -99,7 +99,7 @@ USER_CREDENTIALS = [
 ]
 
 
-def random_sleep(min_time=1, max_time=10):
+def random_sleep(min_time=6, max_time=13):
     """
     Sleeps for a random duration between the specified minimum and maximum times.
 
