@@ -45,23 +45,26 @@ def retry_Exception(recalling_method_name,any_generic_parameter,retry_count=0,ex
                     print(f'!!!!!!!!!!!!! All the retry attempts exhausted. Throwing error now........')
                     return message_json_response(status.HTTP_404_NOT_FOUND, 'error', 'Element not found')
 
-# Function to scrape tweets from a profile
 def scrape_profile_tweets(profile_name=None, retry_count=0):
+    """
+    Scrapes the latest tweets from a specified Twitter profile.
+
+    Args:
+        profile_name (str): The Twitter handle of the profile to scrape tweets from.
+        retry_count (int): The number of retries in case of errors during scraping.
+
+    Returns:
+        dict: A JSON response containing the status, message, and scraped tweet data if successful.
+        str: Error message if the scraping fails.
+
+    Raises:
+        NoSuchElementException: If an element is not found on the page.
+        StaleElementReferenceException: If an element is no longer attached to the DOM.
+
+    """
     print_current_thread()
     driver = initialize_driver()
     print(f'Web Driver initialized successfully...')
-    # def checkScroll():
-    #     total_scroll_height = driver.execute_script('return document.body.scrollHeight')
-    #     current_scroll_position = driver.execute_script('return window.pageYOffset || document.documentElement.scrollTop')
-    #     if current_scroll_position + driver.execute_script('return window.innerHeight') >= total_scroll_height:
-    #         sleep(5)
-    #         data = scrapData()
-    #         return data
-
-    #     else:
-    #         driver.execute_script('window.scrollTo(0,document.body.scrollHeight);')
-    #         sleep(10)
-    #         checkScroll()
 
     def tweet_content_exists(tweets, tweet_content):
         for tweet in tweets:
@@ -96,6 +99,7 @@ def scrape_profile_tweets(profile_name=None, retry_count=0):
 
         if len(data) >= 10:
             sleep(5)
+            print("done scrapping !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             save_data_in_directory(f"Json_Response/{timezone.now().date()}/", profile_name, data)
             return data
 
@@ -144,6 +148,19 @@ def scrape_profile_tweets(profile_name=None, retry_count=0):
  
 @api_view(["POST"])
 def get_tweeted_via_profile_name(request):
+    """
+    Handles POST requests to retrieve tweets from a specified Twitter profile.
+
+    Args:
+        request (HttpRequest): The HTTP request object containing the profile name in the request data.
+
+    Returns:
+        JsonResponse: A JSON response with the status, message, and scraped tweet data if successful.
+                      If the request data is invalid, returns an error response with the validation errors.
+
+    Raises:
+        None
+    """
     serializer = TwitterProfileSerializers(data=request.data)
     profile_name = request.data.get("Profile_name")
     if serializer.is_valid():
@@ -155,20 +172,24 @@ def get_tweeted_via_profile_name(request):
 
 
 def scrape_hashtag_tweets(hashtags, retry_count):
+    """
+    Scrapes tweets containing specified hashtags.
+
+    Args:
+        hashtags (str): The hashtag(s) to scrape tweets for.
+        retry_count (int): The number of retries in case of errors during scraping.
+
+    Returns:
+        dict: A JSON response containing the status, message, and scraped tweet data if successful.
+        str: Error message if the scraping fails.
+
+    Raises:
+        NoSuchElementException: If an element is not found on the page.
+        StaleElementReferenceException: If an element is no longer attached to the DOM.
+    """
     print_current_thread()
     driver = initialize_driver()
-
-    # def checkScroll():
-    # # Compare the two values to check if the scroll is at the bottom
-    #     if len(data) >= 10:
-    #         sleep(5)
-    #         data = scrapData()
-    #         return data
-
-    #     else:
-    #         driver.execute_script('window.scrollTo(0,document.body.scrollHeight);')
-    #         sleep(6)
-    #         checkScroll()
+    print("driver initialize sucessfully !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
     def tweet_content_exists(tweets, tweet_content):
         for tweet in tweets:
@@ -208,6 +229,7 @@ def scrape_hashtag_tweets(hashtags, retry_count):
             sleep(5)
             scrapData()
     success, message = twitterLogin_auth(driver)
+    print("login sucessfully !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     if not success:
         return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', 'Twitter Authentication Error')
     
@@ -233,6 +255,19 @@ def scrape_hashtag_tweets(hashtags, retry_count):
 
 @api_view(["POST"])
 def fetch_tweets_by_hash_tag(request):
+    """
+    Handles POST requests to fetch tweets based on specified hashtags.
+
+    Args:
+        request (HttpRequest): The HTTP request object containing the hashtags in the request data.
+
+    Returns:
+        JsonResponse: A JSON response with the status, message, and scraped tweet data if successful.
+                      If the request data is invalid, returns an error response with the validation errors.
+
+    Raises:
+        None
+    """
     retry_count = 0
     serializer = TweetHashtagSerializer(data=request.data)
     hashtags = request.data.get("hashtags")
@@ -243,8 +278,22 @@ def fetch_tweets_by_hash_tag(request):
         return result
     return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', serializer.errors)
 
-# Function to scrape trending hashtags
 def scrape_trending_hashtags(request, retry_count=0):
+    """
+    Scrapes trending hashtags from Twitter's explore section.
+
+    Args:
+        request (HttpRequest): The HTTP request object.
+        retry_count (int, optional): The number of retries in case of errors during scraping. Defaults to 0.
+
+    Returns:
+        dict: A JSON response containing the status, message, and scraped trending hashtag data if successful.
+        str: Error message if the scraping fails.
+
+    Raises:
+        NoSuchElementException: If an element is not found on the page.
+        StaleElementReferenceException: If an element is no longer attached to the DOM.
+    """
     print_current_thread()
     driver = initialize_driver()
     print("initialize driver sucessfulyy !!!!!!!!!!!!!!!!")
