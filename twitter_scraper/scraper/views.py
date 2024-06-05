@@ -31,6 +31,7 @@ def print_current_thread():
 
 MAX_THREAD_COUNT=5
 MAX_EXCEPTION_RETRIES = 3
+NUMBER_OF_POSTS = 5
 
 # Function to retry a given block of code
 def retry_Exception(recalling_method_name,any_generic_parameter,retry_count=0,exception_name=None):
@@ -44,7 +45,7 @@ def retry_Exception(recalling_method_name,any_generic_parameter,retry_count=0,ex
                 else:
                     print(f'!!!!!!!!!!!!! All the retry attempts exhausted. Throwing error now........')
                     return message_json_response(status.HTTP_404_NOT_FOUND, 'error', 'Element not found')
-
+ 
 def scrape_profile_tweets(profile_name=None, retry_count=0):
     """
     Scrapes the latest tweets from a specified Twitter profile.
@@ -60,92 +61,85 @@ def scrape_profile_tweets(profile_name=None, retry_count=0):
     Raises:
         NoSuchElementException: If an element is not found on the page.
         StaleElementReferenceException: If an element is no longer attached to the DOM.
-
     """
+    def tweet_content_exists(tweets, tweet_content):
+        return any(tweet.get("TweetContent") == tweet_content for tweet in tweets)
+
+    def save_data_and_return(data):
+        save_data_in_directory(f"Json_Response/{timezone.now().date()}/", profile_name, data)
+        return message_json_response(status.HTTP_200_OK, 'success', 'Tweets retrieved successfully', data=data)
+
+    def scrap_data():
+        nonlocal data
+        articles = driver.find_elements(By.XPATH, "//div[@class='css-175oi2r' and @data-testid='cellInnerDiv']")
+        for article in articles:
+            user_tag = article.find_element(By.XPATH, "//*[@id='react-root']/div/div/div[2]/main/div/div/div/div[1]/div/div[3]/div/div/div/div/div[2]").text
+            timestamp = article.find_element(By.XPATH, "//time").get_attribute('datetime')
+            tweet = article.find_element(By.XPATH, "//div[@data-testid='tweetText']").text
+            reply = article.find_element(By.XPATH, '//*[@data-testid="reply"]').text
+            retweet = article.find_element(By.XPATH, '//button[@data-testid="retweet"]//span').text
+            likes = article.find_element(By.XPATH, '//button[@data-testid="like"]//span').text
+
+            if not tweet_content_exists(data, tweet):
+                data.append({
+                    "Name": profile_name,
+                    "UserTag": user_tag,
+                    "Timestamp": timestamp,
+                    "TweetContent": tweet,
+                    "Reply": reply,
+                    "Retweet": retweet,
+                    "Likes": likes
+                })
+                print("data : ", data)
+                print("posts scrap : ", len(data))
+        if len(data) >= NUMBER_OF_POSTS:
+            print(f'{NUMBER_OF_POSTS} posts scrapp sucessfully')
+            return save_data_and_return(data)
+        
+        driver.execute_script("window.scrollBy(0, 200);")
+        sleep(5)
+        scrap_data()
+
+    def retry_scraping(exception_type):
+        if 'driver' in locals():
+            driver.quit()
+        return retry_Exception(scrape_profile_tweets, profile_name, retry_count, exception_type)
+
     print_current_thread()
     driver = initialize_driver()
-    print(f'Web Driver initialized successfully...')
-
-    def tweet_content_exists(tweets, tweet_content):
-        for tweet in tweets:
-            if tweet.get("TweetContent") == tweet_content:
-                return True
-        return False
+    print('Web Driver initialized successfully...')
 
     data = []
-    def scrapData():
-        articles = driver.find_elements(By.XPATH, "//div[@class='css-175oi2r' and @data-testid='cellInnerDiv']")
-        while True:
-            for article in articles:
-                user_tag = article.find_element(By.XPATH, "//*[@id='react-root']/div/div/div[2]/main/div/div/div/div[1]/div/div[3]/div/div/div/div/div[2]").text
-                timestamp = article.find_element(By.XPATH, "//time").get_attribute('datetime')
-                tweet = article.find_element(By.XPATH, "//div[@data-testid='tweetText']").text
-                reply = article.find_element(By.XPATH, f'//*[@data-testid="reply"]').text
-                retweet = article.find_element(By.XPATH, '//button[@data-testid="retweet"]//span').text
-                likes = article.find_element(By.XPATH, '//button[@data-testid="like"]//span').text
-                if tweet_content_exists(data, tweet):
-                    print("scraping !!!!!!!!!!!!!!!!!!!!!")
-                else:
-                    data.append({
-                        "Name": profile_name,
-                        "UserTag": user_tag,
-                        "Timestamp": timestamp,
-                        "TweetContent": tweet,
-                        "Reply": reply,
-                        "Retweet": retweet,
-                        "Likes": likes
-                    })
-            break
-
-        if len(data) >= 10:
-            sleep(5)
-            print("done scrapping !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-            save_data_in_directory(f"Json_Response/{timezone.now().date()}/", profile_name, data)
-            return data
-
-        else:
-            driver.execute_script("window.scrollBy(0, 150);")
-            sleep(5)
-            scrapData()
     success, message = twitterLogin_auth(driver)
     if not success:
         return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', 'Twitter Authentication Error')
 
     try:
+        search_box = driver.find_element(By.XPATH, "//input[@data-testid='SearchBox_Search_Input']")
+        search_box.send_keys(profile_name)
+        search_box.send_keys(Keys.ENTER)
+        print("click on search !!!!!!!!!!!!!!!!!!!")
         random_sleep()
-        try:
-            search_box = driver.find_element(By.XPATH, "//input[@data-testid='SearchBox_Search_Input']")
-            search_box.send_keys(profile_name)
-            search_box.send_keys(Keys.ENTER)
-            print("click on search !!!!!!!!!!!!!!!!!!!")
-            random_sleep()
-            people = driver.find_element(By.XPATH, "//*[@id='react-root']/div/div/div[2]/main/div/div/div/div[1]/div/div[1]/div[1]/div[2]/nav/div/div[2]/div/div[3]/a/div/div/span")
-            people.click()
-            print("click on people !!!!!!!!!!!!!!!!!!")
-            random_sleep()
-            WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.XPATH, "//*[@id='react-root']/div/div/div[2]/main/div/div/div/div[1]/div/div[3]/section/div/div/div[1]/div/div/button/div/div[2]/div[1]/div[1]/div/div[1]/a/div/div[1]/span/span[1]")))
-            profile = driver.find_element(By.XPATH, "//*[@id='react-root']/div/div/div[2]/main/div/div/div/div[1]/div/div[3]/section/div/div/div[1]/div/div/button/div/div[2]/div[1]/div[1]/div/div[1]/a/div/div[1]/span/span[1]")
-            profile.click()
-            print("click on people profile !!!!!!!!!!!!!!!!!!")
-            random_sleep()
-            data = scrapData()
-            sleep(2)
-            driver.quit()
-            return message_json_response(status.HTTP_200_OK, 'success', 'Tweets retrieved successfully', data=data)
-        except StaleElementReferenceException as ex:
-            if 'driver' in locals():
-                driver.quit()
-            return retry_Exception(scrape_profile_tweets,profile_name,retry_count,type(ex).__name__)
+        people = driver.find_element(By.XPATH, "//*[@id='react-root']/div/div/div[2]/main/div/div/div/div[1]/div/div[1]/div[1]/div[2]/nav/div/div[2]/div/div[3]/a/div/div/span")
+        people.click()
+        print("click on people !!!!!!!!!!!!!!!!!!")
+        random_sleep()
+        WebDriverWait(driver, 60).until(
+            EC.presence_of_element_located((By.XPATH, "//*[@id='react-root']/div/div/div[2]/main/div/div/div/div[1]/div/div[3]/section/div/div/div[1]/div/div/button/div/div[2]/div[1]/div[1]/div/div[1]/a/div/div[1]/span/span[1]"))
+        )
+        profile = driver.find_element(By.XPATH, "//*[@id='react-root']/div/div/div[2]/main/div/div/div/div[1]/div/div[3]/section/div/div/div[1]/div/div/button/div/div[2]/div[1]/div[1]/div/div[1]/a/div/div[1]/span/span[1]")
+        profile.click()
+        print("click on people profile !!!!!!!!!!!!!!!!!!")
+        random_sleep()
+        scrap_data()
+        sleep(2)
+        driver.quit()
+        return save_data_and_return(data)
     except NoSuchElementException as e:
-        if 'driver' in locals():
-            driver.quit()
-        return retry_Exception(scrape_profile_tweets,profile_name,retry_count,type(e).__name__)
+        return retry_scraping(type(e).__name__)
     except StaleElementReferenceException as ex:
-        if 'driver' in locals():
-            driver.quit()
-        return retry_Exception(scrape_profile_tweets,profile_name,retry_count,type(ex).__name__)
+        return retry_scraping(type(ex).__name__)
 
- 
 @api_view(["POST"])
 def get_tweeted_via_profile_name(request):
     """
@@ -170,7 +164,6 @@ def get_tweeted_via_profile_name(request):
         return result
     return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', serializer.errors)
 
-
 def scrape_hashtag_tweets(hashtags, retry_count):
     """
     Scrapes tweets containing specified hashtags.
@@ -187,71 +180,73 @@ def scrape_hashtag_tweets(hashtags, retry_count):
         NoSuchElementException: If an element is not found on the page.
         StaleElementReferenceException: If an element is no longer attached to the DOM.
     """
+    def tweet_content_exists(tweets, tweet_content):
+        return any(tweet.get("TweetContent") == tweet_content for tweet in tweets)
+
+    def save_data_and_return(data):
+        save_data_in_directory(f"Json_Response/{timezone.now().date()}/", hashtags, data)
+        return message_json_response(status.HTTP_200_OK, 'success', 'Tweets retrieved successfully', data=data)
+
+    def scrap_data():
+        nonlocal data
+        articles = driver.find_elements(By.XPATH, "//div[@class='css-175oi2r' and @data-testid='cellInnerDiv']")
+        for article in articles:
+            timestamp = article.find_element(By.XPATH, "//time").get_attribute('datetime')
+            tweet = article.find_element(By.XPATH, "//div[@data-testid='tweetText']").text
+            reply = article.find_element(By.XPATH, '//*[@data-testid="reply"]').text
+            retweet = article.find_element(By.XPATH, '//button[@data-testid="retweet"]//span').text
+            likes = article.find_element(By.XPATH, '//button[@data-testid="like"]//span').text
+
+            if not tweet_content_exists(data, tweet):
+                data.append({
+                    "Name": hashtags,
+                    "Timestamp": timestamp,
+                    "TweetContent": tweet,
+                    "Reply": reply,
+                    "Retweet": retweet,
+                    "Likes": likes
+                })
+                print("data :", data)
+                print("posts scrap : ", len(data))
+
+        if len(data) >= NUMBER_OF_POSTS:
+            return save_data_and_return(data)
+        
+        driver.execute_script("window.scrollBy(0, 200);")
+        sleep(5)
+        scrap_data()
+
+    def retry_scraping(exception_type):
+        if 'driver' in locals():
+            driver.quit()
+        return retry_Exception(scrape_hashtag_tweets, hashtags, retry_count, exception_type)
+
     print_current_thread()
     driver = initialize_driver()
-    print("driver initialize sucessfully !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    print("Driver initialized successfully...")
 
-    def tweet_content_exists(tweets, tweet_content):
-        for tweet in tweets:
-            if tweet.get("TweetContent") == tweet_content:
-                return True
-        return False
     data = []
-    def scrapData():
-        articles = driver.find_elements(By.XPATH, "//div[@class='css-175oi2r' and @data-testid='cellInnerDiv']")
-        while True:
-            for article in articles:
-                timestamp = article.find_element(By.XPATH, "//time").get_attribute('datetime')
-                tweet = article.find_element(By.XPATH, "//div[@data-testid='tweetText']").text
-                reply = article.find_element(By.XPATH, f'//*[@data-testid="reply"]').text
-                retweet = article.find_element(By.XPATH, '//button[@data-testid="retweet"]//span').text
-                likes = article.find_element(By.XPATH, '//button[@data-testid="like"]//span').text
-                if tweet_content_exists(data, tweet):
-                    print("scraping !!!!!!!!!!!!!!!!!!!!!")
-                else:
-                    data.append({
-                        "Name": hashtags,
-                        "Timestamp": timestamp,
-                        "TweetContent": tweet,
-                        "Reply": reply,
-                        "Retweet": retweet,
-                        "Likes": likes
-                    })
-            break
-        if len(data) >= 10:
-            sleep(5)
-            print("done scrapping !!!!!!!!!!!!!!!!!!!!")
-            save_data_in_directory(f"Json_Response/{timezone.now().date()}/", hashtags, data)
-            return data
-
-        else:
-            driver.execute_script("window.scrollBy(0, 200);")
-            sleep(5)
-            scrapData()
     success, message = twitterLogin_auth(driver)
-    print("login sucessfully !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    print("Login successful...")
     if not success:
         return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', 'Twitter Authentication Error')
-    
+
     try:
         random_sleep()
         search_box = driver.find_element(By.XPATH, "//input[@data-testid='SearchBox_Search_Input']")
         search_box.send_keys(hashtags)
         search_box.send_keys(Keys.ENTER)
-        print("click on search box !!!!!!!!!!!")
+        print("Click on search box...")
         random_sleep()
-        data = scrapData()
+        scrap_data()
         sleep(2)
         driver.quit()
-        return message_json_response(status.HTTP_200_OK, 'success', 'Tweets retrieved successfully', data=data)
+        return save_data_and_return(data)
     except StaleElementReferenceException as ex:
-            if 'driver' in locals():
-                driver.quit()
-            return retry_Exception(scrape_profile_tweets,hashtags,retry_count,type(ex).__name__)
+        return retry_scraping(type(ex).__name__)
     except NoSuchElementException as e:
-        if 'driver' in locals():
-            driver.quit()
-        return retry_Exception(scrape_hashtag_tweets,hashtags,retry_count,type(e).__name__)
+        return retry_scraping(type(e).__name__)
+
 
 @api_view(["POST"])
 def fetch_tweets_by_hash_tag(request):
@@ -280,57 +275,61 @@ def fetch_tweets_by_hash_tag(request):
 
 def scrape_trending_hashtags(request, retry_count=0):
     """
-    Scrapes trending hashtags from Twitter's explore section.
+    Scrape trending hashtags from Twitter.
+
+    This function scrapes trending hashtags from Twitter's explore section. It scrolls through the page
+    to load all trending topics and extracts relevant information such as ID, category, type, trending topic,
+    and number of posts.
 
     Args:
-        request (HttpRequest): The HTTP request object.
-        retry_count (int, optional): The number of retries in case of errors during scraping. Defaults to 0.
+    - request (HttpRequest): The HTTP request object.
+    - retry_count (int): The number of times the function has retried scraping.
 
     Returns:
-        dict: A JSON response containing the status, message, and scraped trending hashtag data if successful.
-        str: Error message if the scraping fails.
-
-    Raises:
-        NoSuchElementException: If an element is not found on the page.
-        StaleElementReferenceException: If an element is no longer attached to the DOM.
+    - Tuple[bool, list]: A tuple containing a boolean indicating success (True) or failure (False),
+                         and a list of dictionaries representing trending topics.
+                         Each dictionary contains the following keys:
+                         - "id": ID of the trending topic.
+                         - "category": Category of the trending topic.
+                         - "type": Type of the trending topic.
+                         - "trending": The trending topic itself.
+                         - "posts": Number of posts related to the trending topic.
     """
     print_current_thread()
     driver = initialize_driver()
-    print("initialize driver sucessfulyy !!!!!!!!!!!!!!!!")
+    print("initialize driver successful !!!!!!!!!!!!!!!!")
     twitterLogin_auth(driver)
-    print("login sucessfulyy !!!!!!!!!!!!!!!!")
+    print("login successful !!!!!!!!!!!!!!!!")
     try:
         random_sleep()
-        explore_btn = driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div[2]/header/div/div/div/div[1]/div[2]/nav/a[2]/div/div[2]/span")
-        explore_btn.click()
-        random_sleep()
 
-        trending_btn = driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div[2]/main/div/div/div/div[1]/div/div[1]/div[1]/div[2]/nav/div/div[2]/div/div[2]/a/div/div/span")
-        trending_btn.click()
+        explore_btn = driver.find_element(By.XPATH,
+                                          "/html/body/div[1]/div/div/div[2]/header/div/div/div/div[1]/div[2]/nav/a[2]/div/div[2]/span")
+        print('explore element is found')
+        explore_btn.click()
+        print('explore element clicked')
         random_sleep()
+        trending_btn = driver.find_element(By.XPATH,
+                                           "/html/body/div[1]/div/div/div[2]/main/div/div/div/div[1]/div/div[1]/div[1]/div[2]/nav/div/div[2]/div/div[2]/a/div/div/span")
+        print('trending element is found')
+        trending_btn.click()
+        print('trending element clicked')
+        random_sleep()
+        new_height = driver.execute_script("return document.body.scrollHeight")
+        print('new_height found')
         last_height = driver.execute_script("return document.body.scrollHeight")
+        print('last limit is found')
+
         while True:
-            print("scraping !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             random_sleep()
-            new_height = driver.execute_script("return document.body.scrollHeight")
+            driver.execute_script("window.scrollBy(0, 1000);")
+            random_sleep()
             if new_height == last_height:
                 break
             last_height = new_height
-            trending_topics_elements = driver.find_elements(By.XPATH, '//*[@data-testid="cellInnerDiv"]')
-
-    except NoSuchElementException as e:
-        if 'driver' in locals():
-            driver.quit()
-        return retry_Exception(scrape_trending_hashtags,request,retry_count,type(e).__name__)
-    except StaleElementReferenceException as ex:
-        if 'driver' in locals():
-            driver.quit()
-        return retry_Exception(scrape_trending_hashtags,request,retry_count,type(ex).__name__)
-    try:
         trending_topics = []
         trending_topics_elements = driver.find_elements(By.XPATH, '//*[@data-testid="cellInnerDiv"]')
-
+        print('trending element is found')
         for element in trending_topics_elements:
             text = element.text.split('\n')
             if len(text) >= 4:
@@ -342,20 +341,20 @@ def scrape_trending_hashtags(request, retry_count=0):
                     "posts": text[4].strip() if len(text) > 4 else "N/A"
                 }
                 trending_topics.append(item)
-        print("done scrapping !!!!!!!!!!!!!!!!!!")
-        save_data_in_directory(f"Json_Response/{timezone.now().date()}/", "Trending", trending_topics)
-        driver.quit()
-        return message_json_response(status.HTTP_200_OK, 'success', 'Trending hashtags retrieved successfully',
-                                    data=trending_topics)
-    
+        # json_response = trending_topics
+
     except NoSuchElementException as e:
         if 'driver' in locals():
             driver.quit()
-        return retry_Exception(scrape_trending_hashtags,request,retry_count,type(e).__name__)
+        return retry_Exception(scrape_trending_hashtags, request, retry_count, type(e).__name__)
     except StaleElementReferenceException as ex:
         if 'driver' in locals():
             driver.quit()
-        return retry_Exception(scrape_trending_hashtags,request,retry_count,type(ex).__name__)
+        return retry_Exception(scrape_trending_hashtags, request, retry_count, type(ex).__name__)
+
+    if 'driver' in locals():
+        driver.quit()
+    return True, trending_topics
 
 
 @api_view(["get"])
@@ -372,9 +371,13 @@ def get_trending_tweets(request):
 
     with ThreadPoolExecutor(max_workers=5) as executor:
         future = executor.submit(scrape_trending_hashtags, request)
-        result = future.result()
-
-    return result
+        # result = future.result()
+        success, result = future.result()
+    if not success:
+        return message_json_response(status.HTTP_400_BAD_REQUEST, 'error', result)
+    print("done scrapping !!!!!!!!!!!!!!!!!!!!!!!!!!")
+    save_data_in_directory(f"Json_Response/{timezone.now().date()}/", 'Trending', result)
+    return message_json_response(status.HTTP_200_OK, 'success', 'Tweets retrieved successfully', data=result)
 
 
 def scrape_tweets_by_id(request, retry_count):

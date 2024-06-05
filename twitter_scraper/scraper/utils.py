@@ -159,20 +159,20 @@ def twitterLogin_auth(driver):
     sleep(10)
     try:
         username = driver.find_element(By.XPATH, "//input[@name='text']")
-        random_sleep()
         actions = ActionChains(driver)
         actions.move_to_element(username).click().perform()
         type_slowly(username, username_value)
+        random_sleep()
         print("Username element found and value sent successfully.")
     except NoSuchElementException:
         return False, "Username element not found"
     try:
         # Locate and click the "Next" button
         next_button = driver.find_element(By.XPATH, "//span[contains(text(),'Next')]")
-        sleep(10)
+        # sleep(10)
         actions.move_to_element(next_button).click().perform()
         print("Next button element found and clicked successfully.")
-        sleep(6)
+        sleep(10)
     except NoSuchElementException:
         return False, "Next button element not found"
 
@@ -183,17 +183,17 @@ def twitterLogin_auth(driver):
         actions.move_to_element(password).click().perform()
         type_slowly(password, password_value)
         print("Password element found and value sent successfully.")
-        sleep(6)
+        # sleep(6)
     except NoSuchElementException:
         return False, "Password element not found"
 
     try:
         # Locate and click the "Log in" button
         log_in = driver.find_element(By.XPATH, "//span[contains(text(),'Log in')]")
-        random_sleep()
         actions.move_to_element(log_in).click().perform()
         print("Log in button found and clicked successfully.")
-        sleep(6)
+        random_sleep()
+        # sleep(6)
     except NoSuchElementException:
         return False, "Log in button element not found"
 
