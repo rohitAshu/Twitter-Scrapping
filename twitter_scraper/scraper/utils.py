@@ -1,101 +1,107 @@
-import random
-from typing import Optional, Dict
-from django.http import JsonResponse
 import os
 import json
+import random
 from time import sleep
+from typing import Optional, Dict
+
+from django.http import JsonResponse
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import NoSuchElementException
+import undetected_chromedriver as uc
 
 USER_CREDENTIALS = [
     {
         "full name": "Arthur Austin",
         "username": "MaxwellNoe40221",
         "email": "zukinonu@mailinator.com",
-        "password": "qZEa5u7GTr8dD3KuReu25HvA9"
+        "password": "qZEa5u7GTr8dD3KuReu25HvA9",
     },
     {
         "full name": "Melvin Barber",
         "username": "MelvinBarb10693",
         "email": "zavow@mailinator.com",
-        "password": "EF7T6TJwZnE9fakzJLiRfRFDNJuL"
+        "password": "EF7T6TJwZnE9fakzJLiRfRFDNJuL",
     },
     {
         "full name": "Mariam Park",
         "username": "MariamPark98427",
         "email": "gipo@mailinator.com",
-        "password": "Tb5dB5DYBDoboCjLUCDWyADKgevm"
+        "password": "Tb5dB5DYBDoboCjLUCDWyADKgevm",
     },
     {
         "full name": "Anita",
         "username": "Anita4099963550",
         "email": "aneetaexoticait@gmail.com",
-        "password": "Aneeta@123"
+        "password": "Aneeta@123",
     },
     {
         "full name": "Sunny",
         "username": "Sunny634164",
         "email": "sunnyexoticait@gmail.com",
-        "password": "Sunny@123"
+        "password": "Sunny@123",
     },
     {
         "full name": "rohitexoticait",
         "username": "rohitexoticait",
         "email": "rohitexoticait@gmail.com",
-        "password": "asdf123@"
+        "password": "asdf123@",
     },
     {
         "full name": "akhilexoticait",
         "username": "akhilexoticait",
         "email": "akhilexoticait@gmail.com",
-        "password": "asdf123@"
+        "password": "asdf123@",
     },
     {
         "full name": "rimikaexoticait",
         "username": "rimikaexoticait",
         "email": "rimikaexoticait@gmail.com",
-        "password": "asdf123@"
+        "password": "asdf123@",
     },
     {
         "full name": "mamtaexoticait",
         "username": "mamtaexoticait",
         "email": "mamtaexoticait@gmail.com",
-        "password": "asdf123@"
+        "password": "asdf123@",
     },
     {
         "full name": "ExoticaBheem",
         "username": "B51962Bheem",
         "email": "bheem.singh@exoticaitsolutions.com",
-        "password": "2UwPWXMT4woa1rgaon9B"
-    },{
+        "password": "2UwPWXMT4woa1rgaon9B",
+    },
+    {
         "full name": "ExoticaLtd",
         "username": "ExoticaLtd",
         "email": "webbdeveloper24@gmail.com",
-        "password": "S5Us3/)pT$.H#yy"
-    },{
+        "password": "S5Us3/)pT$.H#yy",
+    },
+    {
         "full name": "demetria63800",
         "username": "demetria63800",
         "email": "pifoga@mailinator.com",
-        "password": "3TVNhFa2wJfhYq0"
-    },{
+        "password": "3TVNhFa2wJfhYq0",
+    },
+    {
         "full name": "rohita51719",
         "username": "rohita51719",
         "email": "pifoga@mailinator.com",
-        "password": "Ontario@123"
-    },{
+        "password": "Ontario@123",
+    },
+    {
         "full name": "RAJANGURJAR1606",
         "username": "RAJANGURJAR1606",
         "email": "rajangurjar1606@mailinator.com",
-        "password": "RAAZgujjar@123"
-    },{
+        "password": "RAAZgujjar@123",
+    },
+    {
         "full name": "VivekKhata63896",
         "username": "VivekKhata63896",
         "email": "vivekkhata63896@mailinator.com",
-        "password": "asdf123@"
-    }
-
+        "password": "asdf123@",
+    },
 ]
 
 
@@ -142,7 +148,10 @@ def type_slowly(element, text, delay=0.1):
         sleep(delay)
 
 
-def twitterLogin_auth(driver):
+driver = uc.Chrome(headless=True, use_subprocess=False)
+
+
+def twitter_login_auth(driver):
     """
     Perform Twitter login authentication.
     Returns:
@@ -151,11 +160,11 @@ def twitterLogin_auth(driver):
     """
     # Select a random set of credentials
     credentials = random.choice(USER_CREDENTIALS)
-    username_value = credentials['username']
-    print('username is', username_value)
-    password_value = credentials['password']
-    print('username is', '*' * len(password_value))
-    driver.get('https://twitter.com/i/flow/login')
+    username_value = credentials["username"]
+    print("username is", username_value)
+    password_value = credentials["password"]
+    print("username is", "*" * len(password_value))
+    driver.get("https://twitter.com/i/flow/login")
     sleep(10)
     try:
         username = driver.find_element(By.XPATH, "//input[@name='text']")
@@ -203,12 +212,14 @@ def twitterLogin_auth(driver):
 # Example usage
 if __name__ == "__main__":
     driver = webdriver.Chrome()  # Use your WebDriver of choice
-    success, message = twitterLogin_auth(driver)
+    success, message = twitter_login_auth(driver)
     print(message)
     driver.quit()
 
 
-def message_json_response(code: int, error_type: str, error_message: str, data: Optional[Dict] = None) -> JsonResponse:
+def message_json_response(
+    code: int, error_type: str, error_message: str, data: Optional[Dict] = None
+) -> JsonResponse:
     """
     Create a JSON response with the provided code, error type, error message, and optional data.
     Parameters:
@@ -249,6 +260,6 @@ def save_data_in_directory(folder_name, file_name, json_data: dict):
         os.makedirs(folder_name)
     file_path = os.path.join(folder_name, f"{file_name}.json")
     print(file_path)
-    with open(file_path, "w", encoding='utf-8') as f:
+    with open(file_path, "w", encoding="utf-8") as f:
         json.dump(json_data, f, ensure_ascii=False, indent=4)
     return True
