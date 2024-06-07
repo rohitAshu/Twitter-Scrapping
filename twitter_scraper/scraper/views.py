@@ -59,10 +59,7 @@ def retry_exception(
     if retry_count < MAX_EXCEPTION_RETRIES:
         retry_count = retry_count + 1
         # Retry the function after a delay
-        print(
-            f"******* Retrying attempt after ',{exception_name} in {
-              recalling_method_name},' , Attempt #:' {retry_count}"
-        )
+        print(f"******* Retrying attempt after ',{exception_name} in {recalling_method_name},' , Attempt #:' {retry_count}")
         random_sleep  # Add a delay before retrying
         return recalling_method_name(any_generic_parameter, retry_count)
     else:
