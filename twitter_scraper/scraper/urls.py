@@ -8,7 +8,7 @@ urlpatterns = [
         name="get_Tweeted_via_profile_name",
     ),
     path(
-        "twitter/api/v1/get-tweet-hashtag/",
+        "twitter/api/v1/get-tweets-by-hashtag/",
         views.fetch_tweets_by_hash_tag,
         name="fetch_tweets_by_hash_tag",
     ),
