@@ -1,6 +1,6 @@
 # Project Name
 ## Social Media Scrapping
-In this project we scrap varous plateform data like instgram twitter facebook using python django basically we create a tool that has we scrapp varous social media plateform using tool
+In this project we scrap various platform data like Instagram Twitter Facebook using Python Django we create a tool that has scrapped various social media platforms using tool
 ### Overview
 * The Twitter Scraping project is designed to extract valuable data from Twitter. It provides a robust API that facilitates several functionalities:
 
@@ -24,7 +24,7 @@ Fetch information about specific posts using their unique post IDs.
 ## Installation
 
 ### Python Installation Process
-Before proceeding, ensure Python is installed on your system. If not, you can download and install Python from [python.org](https://www.python.org/downloads/).
+Before proceeding, please make sure Python is installed on your system. If not, you can download and install Python from [python.org](https://www.python.org/downloads/).
 
 ### Setting up a Virtual Environment
 To work with Django, it's recommended to create a virtual environment. Follow the steps outlined in the [Python documentation](https://docs.python.org/3/tutorial/venv.html) or use tools like `virtualenv` or `venv`.
