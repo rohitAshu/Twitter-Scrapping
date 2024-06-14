@@ -1,0 +1,59 @@
+************* Module twitter_scraper.admin
+twitter_scraper\admin.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+twitter_scraper\admin.py:1:0: W0611: Unused admin imported from django.contrib (unused-import)
+************* Module twitter_scraper.apps
+twitter_scraper\apps.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+twitter_scraper\apps.py:4:0: C0115: Missing class docstring (missing-class-docstring)
+************* Module twitter_scraper.models
+twitter_scraper\models.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+twitter_scraper\models.py:1:0: W0611: Unused models imported from django.db (unused-import)
+************* Module twitter_scraper.serializers
+twitter_scraper\serializers.py:17:8: W0107: Unnecessary pass statement (unnecessary-pass)
+twitter_scraper\serializers.py:23:8: W0107: Unnecessary pass statement (unnecessary-pass)
+twitter_scraper\serializers.py:35:8: W0107: Unnecessary pass statement (unnecessary-pass)
+twitter_scraper\serializers.py:41:8: W0107: Unnecessary pass statement (unnecessary-pass)
+twitter_scraper\serializers.py:60:12: W0707: Consider explicitly re-raising using 'except ValueError as exc' and 'raise serializers.ValidationError('Post ID must be an integer') from exc' (raise-missing-from)
+twitter_scraper\serializers.py:69:8: W0107: Unnecessary pass statement (unnecessary-pass)
+twitter_scraper\serializers.py:75:8: W0107: Unnecessary pass statement (unnecessary-pass)
+************* Module twitter_scraper.urls
+twitter_scraper\urls.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+************* Module twitter_scraper.utils
+twitter_scraper\utils.py:144:0: C0301: Line too long (121/100) (line-too-long)
+twitter_scraper\utils.py:257:0: C0301: Line too long (111/100) (line-too-long)
+twitter_scraper\utils.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+twitter_scraper\utils.py:154:23: W0621: Redefining name 'driver' from outer scope (line 151) (redefined-outer-name)
+twitter_scraper\utils.py:241:70: R1735: Consider using '{"indent": 2}' instead of a call to 'dict'. (use-dict-literal)
+************* Module twitter_scraper.views
+twitter_scraper\views.py:113:0: C0301: Line too long (113/100) (line-too-long)
+twitter_scraper\views.py:179:0: C0301: Line too long (141/100) (line-too-long)
+twitter_scraper\views.py:188:0: C0301: Line too long (194/100) (line-too-long)
+twitter_scraper\views.py:194:0: C0301: Line too long (186/100) (line-too-long)
+twitter_scraper\views.py:215:0: C0301: Line too long (103/100) (line-too-long)
+twitter_scraper\views.py:218:0: C0301: Line too long (101/100) (line-too-long)
+twitter_scraper\views.py:219:0: C0301: Line too long (107/100) (line-too-long)
+twitter_scraper\views.py:352:0: C0301: Line too long (101/100) (line-too-long)
+twitter_scraper\views.py:353:0: C0301: Line too long (107/100) (line-too-long)
+twitter_scraper\views.py:375:0: C0301: Line too long (103/100) (line-too-long)
+twitter_scraper\views.py:376:0: C0301: Line too long (109/100) (line-too-long)
+twitter_scraper\views.py:403:0: C0301: Line too long (105/100) (line-too-long)
+twitter_scraper\views.py:411:0: C0301: Line too long (137/100) (line-too-long)
+twitter_scraper\views.py:478:0: C0301: Line too long (102/100) (line-too-long)
+twitter_scraper\views.py:648:0: C0301: Line too long (300/100) (line-too-long)
+twitter_scraper\views.py:650:0: C0301: Line too long (323/100) (line-too-long)
+twitter_scraper\views.py:652:0: C0301: Line too long (118/100) (line-too-long)
+twitter_scraper\views.py:654:0: C0301: Line too long (115/100) (line-too-long)
+twitter_scraper\views.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+twitter_scraper\views.py:55:0: C0116: Missing function or method docstring (missing-function-docstring)
+twitter_scraper\views.py:59:4: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
+twitter_scraper\views.py:66:8: W0104: Statement seems to have no effect (pointless-statement)
+twitter_scraper\views.py:70:12: W1309: Using an f-string that does not have any interpolated variables (f-string-without-interpolation)
+twitter_scraper\views.py:105:4: R1710: Either all return statements in a function should return an expression, or none of them should. (inconsistent-return-statements)
+twitter_scraper\views.py:264:4: R1710: Either all return statements in a function should return an expression, or none of them should. (inconsistent-return-statements)
+twitter_scraper\views.py:496:0: R0914: Too many local variables (19/15) (too-many-locals)
+************* Module twitter_scraper.web_driver
+twitter_scraper\web_driver.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+twitter_scraper\web_driver.py:30:15: W3101: Missing timeout argument for method 'requests.get' can cause your program to hang indefinitely (missing-timeout)
+
+------------------------------------------------------------------
+Your code has been rated at 9.06/10 (previous run: 8.88/10, +0.18)
+
