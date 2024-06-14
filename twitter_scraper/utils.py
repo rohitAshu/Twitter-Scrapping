@@ -13,30 +13,28 @@ import undetected_chromedriver as uc
 
 USER_CREDENTIALS = [
     {
-        "full name": "Arthur Austin",
-        "username": "MaxwellNoe40221",
-        "email": "zukinonu@mailinator.com",
-        "password": "qZEa5u7GTr8dD3KuReu25HvA9",
-    },
-    {
+        # Working
         "full name": "Melvin Barber",
         "username": "MelvinBarb10693",
         "email": "zavow@mailinator.com",
         "password": "EF7T6TJwZnE9fakzJLiRfRFDNJuL",
     },
     {
+        # Working
         "full name": "Mariam Park",
         "username": "MariamPark98427",
         "email": "gipo@mailinator.com",
         "password": "Tb5dB5DYBDoboCjLUCDWyADKgevm",
     },
     {
+        # Working
         "full name": "Anita",
         "username": "Anita4099963550",
         "email": "aneetaexoticait@gmail.com",
         "password": "Aneeta@123",
     },
     {
+        # Working
         "full name": "Sunny",
         "username": "Sunny634164",
         "email": "sunnyexoticait@gmail.com",
