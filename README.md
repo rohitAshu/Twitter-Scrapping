@@ -1,12 +1,22 @@
 # Project Name
-## Twitter Scrapping
-* The Social Media Scraping Project is designed to extract valuable data from Twitter. This project provides a robust API that facilitates the following functionalities:
+## Social Media Scrapping
+In this project we scrap varous plateform data like instgram twitter facebook using python django basically we create a tool that has we scrapp varous social media plateform using tool
+### Overview
+* The Twitter Scraping project is designed to extract valuable data from Twitter. It provides a robust API that facilitates several functionalities:
 
-* Profile Data Scraping: Retrieve detailed information about Twitter profiles using profile names.
-* Trending Hashtags Scraping: Extract the latest trending hashtags on Twitter to stay updated with current trends.
-* Hashtag-based Data Scraping: Collect tweets and associated data by searching specific hashtags.
-* Scraping Using Post-Ids: Fetch information about specific posts using their unique post IDs.
-* Scraping Post Commnets: Fetch information about specific posts using their unique post IDs.
+***Profile Data Scraping***-
+Retrieve detailed information about Twitter profiles using profile names.
+
+***Trending Hashtags Scraping***-
+Extract the latest trending hashtags on Twitter to stay updated with current trends.
+***Hashtag-based Data Scraping***
+Collect tweets and associated data by searching specific hashtags.
+
+***Scraping Using Post-Ids*** -
+Fetch information about specific posts using their unique post IDs.
+
+***Scraping Post Comments***-
+ Fetch comments associated with specific posts using their unique post IDs.
 
 
 # Setup Instructions
@@ -51,11 +61,21 @@ pip install undetected-chromedriver
 ```
 pip install selenium
 ```
+***Core Headers***
+```
+pip install django-cors-headers
+```
+
+***Setuptools***
+```
+python -m pip install --upgrade pip setuptools
+```
+## Chromedriver
+* Ensure that the version of Chromedriver matches the version of Google Chrome installed on your system for proper functionality.
 
 # Run Project
 ```bash
 python manage.py runserver
 ```
 
-* Ensure that the version of Chromedriver matches the version of Google Chrome installed on your system for proper functionality.
 

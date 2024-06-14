@@ -207,12 +207,12 @@ def twitter_login_auth(driver):
     return True, "Twitter login successful"
 
 
-# Example usage
-if __name__ == "__main__":
-    driver = webdriver.Chrome()  # Use your WebDriver of choice
-    success, message = twitter_login_auth(driver)
-    print(message)
-    driver.quit()
+# # Example usage
+# if __name__ == "__main__":
+#     driver = webdriver.Chrome()  # Use your WebDriver of choice
+#     success, message = twitter_login_auth(driver)
+#     print(message)
+#     driver.quit()
 
 
 def message_json_response(
