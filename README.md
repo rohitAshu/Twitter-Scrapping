@@ -1,12 +1,12 @@
 # Project Name
-## Twitter Scrapping
-* The Social Media Scraping Project is designed to extract valuable data from Twitter. This project provides a robust API that facilitates the following functionalities:
+## Social Media Scraping
+* The `Social Media Scraping` Project is designed to extract valuable data from Twitter. This project provides a robust API that facilitates the following functionalities:
 
 * Profile Data Scraping: Retrieve detailed information about Twitter profiles using profile names.
 * Trending Hashtags Scraping: Extract the latest trending hashtags on Twitter to stay updated with current trends.
 * Hashtag-based Data Scraping: Collect tweets and associated data by searching specific hashtags.
 * Scraping Using Post-Ids: Fetch information about specific posts using their unique post IDs.
-* Scraping Post Commnets: Fetch information about specific posts using their unique post IDs.
+* Scraping Post Comments: Fetch information about specific posts using their unique post IDs.
 
 
 # Setup Instructions
@@ -55,6 +55,12 @@ pip install selenium
 # Run Project
 ```bash
 python manage.py runserver
+```
+
+**Unix/MacOS/Linux:**
+
+```bash
+python3 manage.py runserver
 ```
 
 * Ensure that the version of Chromedriver matches the version of Google Chrome installed on your system for proper functionality.
