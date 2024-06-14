@@ -57,5 +57,11 @@ pip install selenium
 python manage.py runserver
 ```
 
+**Unix/MacOS/LLinux:**
+
+```bash
+python3 manage.py runserver
+```
+
 * Ensure that the version of Chromedriver matches the version of Google Chrome installed on your system for proper functionality.
 

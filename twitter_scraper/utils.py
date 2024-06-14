@@ -3,103 +3,100 @@ import json
 import random
 from time import sleep
 from typing import Optional, Dict
-
 from django.http import JsonResponse
-from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import NoSuchElementException
-import undetected_chromedriver as uc
 
 USER_CREDENTIALS = [
     {
         # Working
         "full name": "Melvin Barber",
-        "username": "MelvinBarb10693",
-        "email": "zavow@mailinator.com",
-        "password": "EF7T6TJwZnE9fakzJLiRfRFDNJuL",
-    },
-    {
-        # Working
-        "full name": "Mariam Park",
-        "username": "MariamPark98427",
-        "email": "gipo@mailinator.com",
-        "password": "Tb5dB5DYBDoboCjLUCDWyADKgevm",
-    },
-    {
-        # Working
-        "full name": "Anita",
-        "username": "Anita4099963550",
-        "email": "aneetaexoticait@gmail.com",
-        "password": "Aneeta@123",
-    },
-    {
-        # Working
-        "full name": "Sunny",
-        "username": "Sunny634164",
-        "email": "sunnyexoticait@gmail.com",
-        "password": "Sunny@123",
-    },
-    {
-        "full name": "rohitexoticait",
-        "username": "rohitexoticait",
-        "email": "rohitexoticait@gmail.com",
+        "username": "asdf1227265",
+        "email": "packplanss@gmail.com",
         "password": "asdf123@",
     },
-    {
-        "full name": "akhilexoticait",
-        "username": "akhilexoticait",
-        "email": "akhilexoticait@gmail.com",
-        "password": "asdf123@",
-    },
-    {
-        "full name": "rimikaexoticait",
-        "username": "rimikaexoticait",
-        "email": "rimikaexoticait@gmail.com",
-        "password": "asdf123@",
-    },
-    {
-        "full name": "mamtaexoticait",
-        "username": "mamtaexoticait",
-        "email": "mamtaexoticait@gmail.com",
-        "password": "asdf123@",
-    },
-    {
-        "full name": "ExoticaBheem",
-        "username": "B51962Bheem",
-        "email": "bheem.singh@exoticaitsolutions.com",
-        "password": "2UwPWXMT4woa1rgaon9B",
-    },
-    {
-        "full name": "ExoticaLtd",
-        "username": "ExoticaLtd",
-        "email": "webbdeveloper24@gmail.com",
-        "password": "S5Us3/)pT$.H#yy",
-    },
-    {
-        "full name": "demetria63800",
-        "username": "demetria63800",
-        "email": "pifoga@mailinator.com",
-        "password": "3TVNhFa2wJfhYq0",
-    },
-    {
-        "full name": "rohita51719",
-        "username": "rohita51719",
-        "email": "pifoga@mailinator.com",
-        "password": "Ontario@123",
-    },
-    {
-        "full name": "RAJANGURJAR1606",
-        "username": "RAJANGURJAR1606",
-        "email": "rajangurjar1606@mailinator.com",
-        "password": "RAAZgujjar@123",
-    },
-    {
-        "full name": "VivekKhata63896",
-        "username": "VivekKhata63896",
-        "email": "vivekkhata63896@mailinator.com",
-        "password": "asdf123@",
-    },
+    # {
+    #     # Working
+    #     "full name": "Mariam Park",
+    #     "username": "MariamPark98427",
+    #     "email": "gipo@mailinator.com",
+    #     "password": "Tb5dB5DYBDoboCjLUCDWyADKgevm",
+    # },
+    # {
+    #     # Working
+    #     "full name": "Anita",
+    #     "username": "Anita4099963550",
+    #     "email": "aneetaexoticait@gmail.com",
+    #     "password": "Aneeta@123",
+    # },
+    # {
+    #     # Working
+    #     "full name": "Sunny",
+    #     "username": "Sunny634164",
+    #     "email": "sunnyexoticait@gmail.com",
+    #     "password": "Sunny@123",
+    # },
+    # {
+    #     "full name": "rohitexoticait",
+    #     "username": "rohitexoticait",
+    #     "email": "rohitexoticait@gmail.com",
+    #     "password": "asdf123@",
+    # },
+    # {
+    #     "full name": "akhilexoticait",
+    #     "username": "akhilexoticait",
+    #     "email": "akhilexoticait@gmail.com",
+    #     "password": "asdf123@",
+    # },
+    # {
+    #     "full name": "rimikaexoticait",
+    #     "username": "rimikaexoticait",
+    #     "email": "rimikaexoticait@gmail.com",
+    #     "password": "asdf123@",
+    # },
+    # {
+    #     "full name": "mamtaexoticait",
+    #     "username": "mamtaexoticait",
+    #     "email": "mamtaexoticait@gmail.com",
+    #     "password": "asdf123@",
+    # },
+    # {
+    #     "full name": "ExoticaBheem",
+    #     "username": "B51962Bheem",
+    #     "email": "bheem.singh@exoticaitsolutions.com",
+    #     "password": "2UwPWXMT4woa1rgaon9B",
+    # },
+    # {
+    #     "full name": "ExoticaLtd",
+    #     "username": "ExoticaLtd",
+    #     "email": "webbdeveloper24@gmail.com",
+    #     "password": "S5Us3/)pT$.H#yy",
+    # },
+    # {
+    #     "full name": "demetria63800",
+    #     "username": "demetria63800",
+    #     "email": "pifoga@mailinator.com",
+    #     "password": "3TVNhFa2wJfhYq0",
+    # },
+    # {
+    #     "full name": "rohita51719",
+    #     "username": "rohita51719",
+    #     "email": "pifoga@mailinator.com",
+    #     "password": "Ontario@123",
+    # },
+    # {
+    #     "full name": "RAJANGURJAR1606",
+    #     "username": "RAJANGURJAR1606",
+    #     "email": "rajangurjar1606@mailinator.com",
+    #     "password": "RAAZgujjar@123",
+    # },
+    # {
+    #     "full name": "VivekKhata63896",
+    #     "username": "VivekKhata63896",
+    #     "email": "vivekkhata63896@mailinator.com",
+    #     "password": "asdf123@",
+    # },
 ]
 
 
@@ -144,9 +141,6 @@ def type_slowly(element, text, delay=0.1):
     for char in text:
         element.send_keys(char)
         sleep(delay)
-
-
-driver = uc.Chrome(headless=True, use_subprocess=False)
 
 
 def twitter_login_auth(driver):
@@ -207,16 +201,8 @@ def twitter_login_auth(driver):
     return True, "Twitter login successful"
 
 
-# Example usage
-if __name__ == "__main__":
-    driver = webdriver.Chrome()  # Use your WebDriver of choice
-    success, message = twitter_login_auth(driver)
-    print(message)
-    driver.quit()
-
-
 def message_json_response(
-    code: int, error_type: str, error_message: str, data: Optional[Dict] = None
+        code: int, error_type: str, error_message: str, data: Optional[Dict] = None
 ) -> JsonResponse:
     """
     Create a JSON response with the provided code, error type, error message, and optional data.
