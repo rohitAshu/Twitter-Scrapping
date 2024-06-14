@@ -1,6 +1,6 @@
 # Project Name
-## Twitter Scrapping
-* The Social Media Scraping Project is designed to extract valuable data from Twitter. This project provides a robust API that facilitates the following functionalities:
+## Social Media Scraping
+* The `Social Media Scraping` Project is designed to extract valuable data from Twitter. This project provides a robust API that facilitates the following functionalities:
 
 * Profile Data Scraping: Retrieve detailed information about Twitter profiles using profile names.
 * Trending Hashtags Scraping: Extract the latest trending hashtags on Twitter to stay updated with current trends.
