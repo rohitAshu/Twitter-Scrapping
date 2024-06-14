@@ -6,7 +6,7 @@
 * Trending Hashtags Scraping: Extract the latest trending hashtags on Twitter to stay updated with current trends.
 * Hashtag-based Data Scraping: Collect tweets and associated data by searching specific hashtags.
 * Scraping Using Post-Ids: Fetch information about specific posts using their unique post IDs.
-* Scraping Post Commnets: Fetch information about specific posts using their unique post IDs.
+* Scraping Post Comments: Fetch information about specific posts using their unique post IDs.
 
 
 # Setup Instructions
