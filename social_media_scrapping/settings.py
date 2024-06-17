@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+from dotenv import load_dotenv
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,6 +28,18 @@ SECRET_KEY = "django-insecure-pz5t##@p$2z=+#qdol5ou=-x$9o9x0vs-%b5%p-47)+wf@#qth
 DEBUG = True
 
 ALLOWED_HOSTS = []
+
+
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Get the proxy settings from environment variables
+PAIDPROXY = os.getenv('PAIDPROXY') == 'True'
+PROXY_HOST = os.getenv('PROXY_HOST')
+PROXY_PORT = int(os.getenv('PROXY_PORT'))
+PROXY_USERNAME = os.getenv('PROXY_USERNAME')
+PROXY_PASSWORD = os.getenv('PROXY_PASSWORD')
 
 
 # Application definition

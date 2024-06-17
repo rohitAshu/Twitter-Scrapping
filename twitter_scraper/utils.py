@@ -61,6 +61,12 @@ def get_mailinator_code(email):
 
 USER_CREDENTIALS = [
     {
+        "full name": "MosleySeri72159",
+        "username": "MosleySeri72159",
+        "email": "xohik@mailinator.com",
+        "password": "asdf123@",
+    },
+    {
         "full name": "Melvin Barber",
         "username": "MelvinBarb10693",
         "email": "zavow@mailinator.com",
@@ -220,7 +226,7 @@ def twitter_login_auth(driver):
     random_sleep()
     try:
         code_input_box = driver.find_element(By.XPATH, "//input[@inputmode='text']")
-        print("code input me gya")
+        print("code input box come")
         code = get_mailinator_code(email)
         code_input_box.send_keys(code)
         sleep(8)
@@ -229,7 +235,7 @@ def twitter_login_auth(driver):
         sleep(10)
     except:
         email_input_box = driver.find_element(By.XPATH, "//input[@inputmode='email']")
-        print("email input me gya")
+        print("email input box email")
         email_input_box.send_keys(email)
         sleep(5)
         next_button_click = driver.find_element(By.XPATH, "//div[@class='css-175oi2r r-b9tw7p']//button").click()
