@@ -3,100 +3,124 @@ import json
 import random
 from time import sleep
 from typing import Optional, Dict
+
 from django.http import JsonResponse
+from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import NoSuchElementException
+import undetected_chromedriver as uc
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
+
+
+
+def get_mailinator_code(email):
+    username = email.split('@')[0]
+    url = f'https://www.mailinator.com/v4/public/inboxes.jsp?to={username}'
+    
+    # driver = webdriver.Chrome()
+    driver = uc.Chrome(headless=True, use_subprocess=False)
+    options = webdriver.ChromeOptions()
+    options.add_argument(
+        "--headless"
+    ) 
+    driver.maximize_window()
+    driver.get(url)
+    sleep(10)  # Wait for the page to load
+    
+    try:
+        sleep(3)
+        # Click the email item
+        outer_click = driver.find_element(By.XPATH, '/html/body/div/main/div[2]/div[3]/div/div[4]/div/div/table/tbody/tr/td[3]').click()
+        sleep(7)
+        
+        # Get the element containing the code
+        element = driver.find_element(By.XPATH, "//div[@class='fz-20 ff-futura-demi gray-color ng-binding']").text
+        sleep(3)
+        
+        # Extract the code
+        last = element.split()[-1]
+        first = element.split()[0]
+        print("element : ", element,first,last)
+        code = first if first.isdigit() else last
+        
+        print(f"Code is: {code}")
+        return code
+        
+    except NoSuchElementException:
+        print("Element not found. Check if the class name is correct.")
+        return None
+    
+    except TimeoutException:
+        print("Timed out waiting for the element to be visible.")
+        return None
+    
+    finally:
+        driver.quit()
+
 
 USER_CREDENTIALS = [
     {
-        # Working
         "full name": "Melvin Barber",
-        "username": "asdf1227265",
-        "email": "packplanss@gmail.com",
+        "username": "MelvinBarb10693",
+        "email": "zavow@mailinator.com",
+        "password": "EF7T6TJwZnE9fakzJLiRfRFDNJuL",
+    },
+    {
+        "full name": "Mariam Park",
+        "username": "MariamPark98427",
+        "email": "gipo@mailinator.com",
         "password": "asdf123@",
     },
-    # {
-    #     # Working
-    #     "full name": "Mariam Park",
-    #     "username": "MariamPark98427",
-    #     "email": "gipo@mailinator.com",
-    #     "password": "Tb5dB5DYBDoboCjLUCDWyADKgevm",
-    # },
-    # {
-    #     # Working
-    #     "full name": "Anita",
-    #     "username": "Anita4099963550",
-    #     "email": "aneetaexoticait@gmail.com",
-    #     "password": "Aneeta@123",
-    # },
-    # {
-    #     # Working
-    #     "full name": "Sunny",
-    #     "username": "Sunny634164",
-    #     "email": "sunnyexoticait@gmail.com",
-    #     "password": "Sunny@123",
-    # },
-    # {
-    #     "full name": "rohitexoticait",
-    #     "username": "rohitexoticait",
-    #     "email": "rohitexoticait@gmail.com",
-    #     "password": "asdf123@",
-    # },
-    # {
-    #     "full name": "akhilexoticait",
-    #     "username": "akhilexoticait",
-    #     "email": "akhilexoticait@gmail.com",
-    #     "password": "asdf123@",
-    # },
-    # {
-    #     "full name": "rimikaexoticait",
-    #     "username": "rimikaexoticait",
-    #     "email": "rimikaexoticait@gmail.com",
-    #     "password": "asdf123@",
-    # },
-    # {
-    #     "full name": "mamtaexoticait",
-    #     "username": "mamtaexoticait",
-    #     "email": "mamtaexoticait@gmail.com",
-    #     "password": "asdf123@",
-    # },
-    # {
-    #     "full name": "ExoticaBheem",
-    #     "username": "B51962Bheem",
-    #     "email": "bheem.singh@exoticaitsolutions.com",
-    #     "password": "2UwPWXMT4woa1rgaon9B",
-    # },
-    # {
-    #     "full name": "ExoticaLtd",
-    #     "username": "ExoticaLtd",
-    #     "email": "webbdeveloper24@gmail.com",
-    #     "password": "S5Us3/)pT$.H#yy",
-    # },
-    # {
-    #     "full name": "demetria63800",
-    #     "username": "demetria63800",
-    #     "email": "pifoga@mailinator.com",
-    #     "password": "3TVNhFa2wJfhYq0",
-    # },
-    # {
-    #     "full name": "rohita51719",
-    #     "username": "rohita51719",
-    #     "email": "pifoga@mailinator.com",
-    #     "password": "Ontario@123",
-    # },
-    # {
-    #     "full name": "RAJANGURJAR1606",
-    #     "username": "RAJANGURJAR1606",
-    #     "email": "rajangurjar1606@mailinator.com",
-    #     "password": "RAAZgujjar@123",
-    # },
-    # {
-    #     "full name": "VivekKhata63896",
-    #     "username": "VivekKhata63896",
-    #     "email": "vivekkhata63896@mailinator.com",
-    #     "password": "asdf123@",
-    # },
+    {
+        "full name": "demetria63800",
+        "username": "demetria63800",
+        "email": "pifoga@mailinator.com",
+        "password": "3TVNhFa2wJfhYq0",
+    },
+    {
+        "full name": "JoelClay287888",
+        "username": "JoelClay287888",
+        "email": "gery@mailinator.com",
+        "password": "asdf123@",
+    },
+    {
+        "full name": "knight_may39057",
+        "username": "knight_may39057",
+        "email": "paro@mailinator.com",
+        "password": "asdf123@",
+    },
+    {
+        "full name": "ShaeleighT54515",
+        "username": "ShaeleighT54515",
+        "email": "kazoruzog@mailinator.com",
+        "password": "asdf123@",
+    },
+    {
+        "full name": "rocha_domi30885",
+        "username": "rocha_domi30885",
+        "email": "xawi@mailinator.com",
+        "password": "asdf123@",
+    },
+    {
+        "full name": "jemima_rui69057",
+        "username": "jemima_rui69057",
+        "email": "noxy@mailinator.com",
+        "password": "asdf123@",
+    },
+    {
+        "full name": "ChristianF88294",
+        "username": "ChristianF88294",
+        "email": "nutihidyf@mailinator.com",
+        "password": "asdf123@",
+    },
+    {
+        "full name": "ConstanceF3888",
+        "username": "ConstanceF3888",
+        "email": "dasavoxoga@mailinator.com",
+        "password": "asdf123@",
+    },
+   
 ]
 
 
@@ -143,6 +167,9 @@ def type_slowly(element, text, delay=0.1):
         sleep(delay)
 
 
+driver = uc.Chrome(headless=True, use_subprocess=False)
+
+
 def twitter_login_auth(driver):
     """
     Perform Twitter login authentication.
@@ -155,7 +182,9 @@ def twitter_login_auth(driver):
     username_value = credentials["username"]
     print("username is", username_value)
     password_value = credentials["password"]
-    print("username is", "*" * len(password_value))
+    print("password is", "*" * len(password_value))
+    email = credentials["email"]
+    print("email : ", email)
     driver.get("https://twitter.com/i/flow/login")
     sleep(10)
     try:
@@ -168,9 +197,7 @@ def twitter_login_auth(driver):
     except NoSuchElementException:
         return False, "Username element not found"
     try:
-        # Locate and click the "Next" button
         next_button = driver.find_element(By.XPATH, "//span[contains(text(),'Next')]")
-        # sleep(10)
         actions.move_to_element(next_button).click().perform()
         print("Next button element found and clicked successfully.")
         sleep(10)
@@ -178,31 +205,40 @@ def twitter_login_auth(driver):
         return False, "Next button element not found"
 
     try:
-        # Locate the password input field and type the password
         password = driver.find_element(By.XPATH, "//input[@name='password']")
         random_sleep()
         actions.move_to_element(password).click().perform()
         type_slowly(password, password_value)
         print("Password element found and value sent successfully.")
-        # sleep(6)
     except NoSuchElementException:
         return False, "Password element not found"
 
+    # Locate and click the "Log in" button
+    log_in = driver.find_element(By.XPATH, "//span[contains(text(),'Log in')]")
+    actions.move_to_element(log_in).click().perform()
+    print("Log in button found and clicked successfully.")
+    random_sleep()
     try:
-        # Locate and click the "Log in" button
-        log_in = driver.find_element(By.XPATH, "//span[contains(text(),'Log in')]")
-        actions.move_to_element(log_in).click().perform()
-        print("Log in button found and clicked successfully.")
-        random_sleep()
-        # sleep(6)
-    except NoSuchElementException:
-        return False, "Log in button element not found"
-
-    return True, "Twitter login successful"
-
+        code_input_box = driver.find_element(By.XPATH, "//input[@inputmode='text']")
+        print("code input me gya")
+        code = get_mailinator_code(email)
+        code_input_box.send_keys(code)
+        sleep(8)
+        print("confirmation code writen")
+        next_button_click = driver.find_element(By.XPATH, "//div[@class='css-175oi2r r-b9tw7p']//button").click()
+        sleep(10)
+    except:
+        email_input_box = driver.find_element(By.XPATH, "//input[@inputmode='email']")
+        print("email input me gya")
+        email_input_box.send_keys(email)
+        sleep(5)
+        next_button_click = driver.find_element(By.XPATH, "//div[@class='css-175oi2r r-b9tw7p']//button").click()
+        sleep(15)
+    finally:
+        return True, "Twitter login successful"
 
 def message_json_response(
-        code: int, error_type: str, error_message: str, data: Optional[Dict] = None
+    code: int, error_type: str, error_message: str, data: Optional[Dict] = None
 ) -> JsonResponse:
     """
     Create a JSON response with the provided code, error type, error message, and optional data.
@@ -223,7 +259,6 @@ def message_json_response(
         response_data["data"] = data
 
     return JsonResponse(response_data, status=code, json_dumps_params=dict(indent=2))
-
 
 def save_data_in_directory(folder_name, file_name, json_data: dict):
     """
