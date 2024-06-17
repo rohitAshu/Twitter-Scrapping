@@ -19,7 +19,7 @@ def get_mailinator_code(email):
     url = f'https://www.mailinator.com/v4/public/inboxes.jsp?to={username}'
     
     # driver = webdriver.Chrome()
-    driver = uc.Chrome(headless=True, use_subprocess=False)
+    driver = uc.Chrome(use_subprocess=False)
     options = webdriver.ChromeOptions()
     options.add_argument(
         "--headless"
@@ -126,11 +126,17 @@ USER_CREDENTIALS = [
         "email": "dasavoxoga@mailinator.com",
         "password": "asdf123@",
     },
+    {
+        "full name": "WeissJorde72850",
+        "username": "WeissJorde72850",
+        "email": "racibezasa@mailinator.com",
+        "password": "asdf123@",
+    },
    
 ]
 
 
-def random_sleep(min_time=6, max_time=13):
+def random_sleep(min_time=6, max_time=10):
     """
     Sleeps for a random duration between the specified minimum and maximum times.
 
@@ -229,17 +235,17 @@ def twitter_login_auth(driver):
         print("code input box come")
         code = get_mailinator_code(email)
         code_input_box.send_keys(code)
-        sleep(8)
+        random_sleep()
         print("confirmation code writen")
         next_button_click = driver.find_element(By.XPATH, "//div[@class='css-175oi2r r-b9tw7p']//button").click()
-        sleep(10)
+        random_sleep()
     except:
         email_input_box = driver.find_element(By.XPATH, "//input[@inputmode='email']")
         print("email input box email")
         email_input_box.send_keys(email)
-        sleep(5)
+        random_sleep()
         next_button_click = driver.find_element(By.XPATH, "//div[@class='css-175oi2r r-b9tw7p']//button").click()
-        sleep(15)
+        random_sleep()
     finally:
         return True, "Twitter login successful"
 

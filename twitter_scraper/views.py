@@ -678,7 +678,7 @@ def get_comments_for_tweet(request, retry_count=0):
         success = twitter_login_auth(driver)
         if success:
             print("login sucessfully !!!!!!!!!!!!!!!!!!!!!!!!!!")
-            sleep(16)
+            random_sleep()
         data = []
 
         for post_id in post_ids:
