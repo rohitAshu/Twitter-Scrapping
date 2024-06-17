@@ -166,19 +166,14 @@ def initialize_driver():
     options.add_argument(
         "--headless"
     )  # Uncomment this line if you want to run in headless mode
-    # Randomize window size
     width = random.randint(800, 1920)
     height = random.randint(600, 1080)
     window_size = f"{width},{height}"
     options.add_argument(f"--window-size={window_size}")
-    # Print the selected window size
     print(f"Window Size: {window_size}")
-
     options.add_argument("--disable-third-party-cookies")
-    # Generate a random user agent
     user_agent = UserAgent().random
     options.add_argument(f"--user-agent={user_agent}")
-    # Print the selected user agent
     print(f"User Agent: {user_agent}")
     driver = webdriver.Chrome(options=options)
     return driver
