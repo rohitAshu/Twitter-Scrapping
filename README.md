@@ -5,7 +5,7 @@
 * The Social Media Scraping Tool is designed to extract data from multiple social media platforms. This document details the module specifically for Twitter scraping, outlining the available APIs and their functionalities.
 
 ## Module Name 
-### Twitter SCrapper
+### Twitter Scrapper
 * The Twitter Scraper module provides APIs to scrape data from Twitter using various approaches, such as profile names, hashtags, trending topics, and post IDs.
 ### APIs
 
@@ -79,6 +79,34 @@ pip install django-cors-headers
 ***Setuptools***
 ```
 python -m pip install --upgrade pip setuptools
+```
+***selenium-wire***
+```
+pip install selenium-wire
+```
+***python-dotenv***
+```
+pip install python-dotenv
+```
+
+## Environment Variables
+ To run this project, you will need to add the following environment variables to your .env file
+# Create .env file
+in linux
+```
+touch .env
+```
+in window 
+```
+type nul > .env
+```
+## Setup .env File 
+```
+PAIDPROXY = FALSE
+PROXY_HOST = PROXY_HOST
+PROXY_PORT = PROXY_PORT
+PROXY_USERNAME = PROXY_USERNAME
+PROXY_PASSWORD = PROXY_PASSWORD
 ```
 ## Chromedriver
 * Ensure that the version of Chromedriver matches the version of Google Chrome installed on your system for proper functionality.

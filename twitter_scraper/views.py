@@ -25,7 +25,8 @@ from .utils import (
     save_data_in_directory,
     random_sleep,
 )
-from .web_driver import initialize_driver
+from .web_driver import InitializeDriver
+from django.conf import settings
 
 
 def print_current_thread():
@@ -158,7 +159,8 @@ def scrape_profile_tweets(profile_name=None, retry_count=0):
         )
 
     print_current_thread()
-    driver = initialize_driver()
+    driver_initializer = InitializeDriver()
+    driver = driver_initializer.initialize_paid_proxy() if settings.PAIDPROXY else driver_initializer.initialize_free_proxy()
     print("Web Driver initialized successfully...")
 
     data = []
@@ -312,7 +314,8 @@ def scrape_hashtag_tweets(hashtags, retry_count):
         )
 
     print_current_thread()
-    driver = initialize_driver()
+    driver_initializer = InitializeDriver()
+    driver = driver_initializer.initialize_paid_proxy() if settings.PAIDPROXY else driver_initializer.initialize_free_proxy()
     print("Driver initialized successfully...")
 
     data = []
@@ -393,7 +396,8 @@ def scrape_trending_hashtags(request, retry_count=0):
                          - "posts": Number of posts related to the trending topic.
     """
     print_current_thread()
-    driver = initialize_driver()
+    driver_initializer = InitializeDriver()
+    driver = driver_initializer.initialize_paid_proxy() if settings.PAIDPROXY else driver_initializer.initialize_free_proxy()
     print("initialize driver successful !!!!!!!!!!!!!!!!")
     twitter_login_auth(driver)
     print("login successful !!!!!!!!!!!!!!!!")
@@ -508,7 +512,8 @@ def scrape_tweets_by_id(request, retry_count):
     serializer = TweetUrlSerializer(data=request.data)
     if serializer.is_valid():
         print_current_thread()
-        driver = initialize_driver()
+        driver_initializer = InitializeDriver()
+        driver = driver_initializer.initialize_paid_proxy() if settings.PAIDPROXY else driver_initializer.initialize_free_proxy()
         print("initialize driver sucessfulyy !!!!!!!!!!!!!!!!")
         post_ids = request.data.get("post_ids")
 
@@ -666,7 +671,8 @@ def get_comments_for_tweet(request, retry_count=0):
     """
     serializer = TweetUrlSerializer(data=request.data)
     if serializer.is_valid():
-        driver = initialize_driver()
+        driver_initializer = InitializeDriver()
+        driver = driver_initializer.initialize_paid_proxy() if settings.PAIDPROXY else driver_initializer.initialize_free_proxy()
         print("initilize driver !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
         post_ids = request.data.get("post_ids")
         success = twitter_login_auth(driver)
