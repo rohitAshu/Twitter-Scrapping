@@ -13,48 +13,50 @@ import undetected_chromedriver as uc
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 
 
-
 def get_mailinator_code(email):
-    username = email.split('@')[0]
-    url = f'https://www.mailinator.com/v4/public/inboxes.jsp?to={username}'
-    
+    username = email.split("@")[0]
+    url = f"https://www.mailinator.com/v4/public/inboxes.jsp?to={username}"
+
     # driver = webdriver.Chrome()
     driver = uc.Chrome(use_subprocess=False)
     options = webdriver.ChromeOptions()
-    options.add_argument(
-        "--headless"
-    ) 
+    options.add_argument("--headless")
     driver.maximize_window()
     driver.get(url)
     sleep(10)  # Wait for the page to load
-    
+
     try:
         sleep(3)
         # Click the email item
-        outer_click = driver.find_element(By.XPATH, '/html/body/div/main/div[2]/div[3]/div/div[4]/div/div/table/tbody/tr/td[3]').click()
+        outer_click = driver.find_element(
+            By.XPATH,
+            "/html/body/div/main/div[2]/div[3]/div/div[4]/div/div/table/tbody/tr/td[3]",
+        ).click()
         sleep(7)
-        
+
         # Get the element containing the code
-        element = driver.find_element(By.XPATH, "//div[@class='fz-20 ff-futura-demi gray-color ng-binding']").text
+        element = driver.find_element(
+            By.XPATH, "//div[@class='fz-20 ff-futura-demi gray-color ng-binding']"
+        ).text
         sleep(3)
-        
+
         # Extract the code
         last = element.split()[-1]
         first = element.split()[0]
-        print("element : ", element,first,last)
+        print("element : ", element, first, last)
         code = first if first.isdigit() else last
-        
+
         print(f"Code is: {code}")
         return code
-        
+
     except NoSuchElementException:
         print("Element not found. Check if the class name is correct.")
         return None
-    
+
     except TimeoutException:
         print("Timed out waiting for the element to be visible.")
         return None
-    
+
     finally:
         driver.quit()
 
@@ -132,7 +134,6 @@ USER_CREDENTIALS = [
         "email": "racibezasa@mailinator.com",
         "password": "asdf123@",
     },
-   
 ]
 
 
@@ -179,7 +180,7 @@ def type_slowly(element, text, delay=0.1):
         sleep(delay)
 
 
-driver = uc.Chrome(headless=True, use_subprocess=False)
+# driver = uc.Chrome(headless=True, use_subprocess=False)
 
 
 def twitter_login_auth(driver):
@@ -231,23 +232,33 @@ def twitter_login_auth(driver):
     print("Log in button found and clicked successfully.")
     random_sleep()
     try:
+        # Attempt to find the code input box for authentication
         code_input_box = driver.find_element(By.XPATH, "//input[@inputmode='text']")
-        print("code input box come")
+        print("Code input box found for authentication")
+        # Get verification code from Mailinator
         code = get_mailinator_code(email)
-        code_input_box.send_keys(code)
+        code_input_box.send_keys(code) # Enter the verification code
         random_sleep()
         print("confirmation code writen")
-        next_button_click = driver.find_element(By.XPATH, "//div[@class='css-175oi2r r-b9tw7p']//button").click()
+        # Click the next button to proceed with authentication
+        next_button_click = driver.find_element(
+            By.XPATH, "//div[@class='css-175oi2r r-b9tw7p']//button"
+        ).click()
         random_sleep()
-    except:
+    except BaseException:
+        # If code input box is not found, handle the scenario where email input box is displayed for authentication
         email_input_box = driver.find_element(By.XPATH, "//input[@inputmode='email']")
-        print("email input box email")
-        email_input_box.send_keys(email)
+        print("Email input box found for authentication")
+        email_input_box.send_keys(email)# Enter the email address
         random_sleep()
-        next_button_click = driver.find_element(By.XPATH, "//div[@class='css-175oi2r r-b9tw7p']//button").click()
+        next_button_click = driver.find_element(
+            By.XPATH, "//div[@class='css-175oi2r r-b9tw7p']//button"
+        ).click()
         random_sleep()
     finally:
+        # Return success status and message indicating successful Twitter login
         return True, "Twitter login successful"
+
 
 def message_json_response(
     code: int, error_type: str, error_message: str, data: Optional[Dict] = None
@@ -271,6 +282,7 @@ def message_json_response(
         response_data["data"] = data
 
     return JsonResponse(response_data, status=code, json_dumps_params=dict(indent=2))
+
 
 def save_data_in_directory(folder_name, file_name, json_data: dict):
     """

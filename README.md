@@ -59,6 +59,14 @@ pip install -r requirements.txt
 
 # Individual Dependencies
 
+***Core Headers***
+```
+pip install django-cors-headers
+```
+***blinker***
+```
+pip install blinker==1.7.0
+```
 **Undetected Chromedriver**
 ```
 pip install undetected-chromedriver
@@ -71,19 +79,20 @@ pip install selenium
 ```
 pip install fake-useragent
 ```
-***Core Headers***
-```
-pip install django-cors-headers
-```
 
 ***Setuptools***
 ```
 python -m pip install --upgrade pip setuptools
 ```
+***Wbdriver Manager***
+```
+pip install webdriver-manager
+```
 ***selenium-wire***
 ```
 pip install selenium-wire
 ```
+
 ***python-dotenv***
 ```
 pip install python-dotenv
