@@ -27,7 +27,7 @@ from .web_driver import InitializeDriver
 
 MAX_THREAD_COUNT = 5
 MAX_EXCEPTION_RETRIES = 3
-NUMBER_OF_POSTS = 3
+NUMBER_OF_POSTS = 1
 
 driver_initializer = InitializeDriver()
 
@@ -539,7 +539,7 @@ def scrap_get_comments_for_tweet(request, retry_count=0):
             WebDriverWait(driver, 15).until(
                 ec.presence_of_element_located((By.XPATH, "//*[@role='article']"))
             )
-            while len(data) < 5:
+            while len(data) < NUMBER_OF_POSTS:
                 driver.execute_script("window.scrollBy(0, 200);")
                 sleep(5)
 

@@ -137,7 +137,25 @@ PROXY_PASSWORD = PROXY_PASSWORD
 ```
 ## Chromedriver
 * Ensure that the version of Chromedriver matches the version of Google Chrome installed on your system for proper functionality.
-
+# Redish
+```
+sudo apt install redis-server
+```
+```commandline
+sudo apt install redis-tools
+```
+```commandline
+redis-cli ping
+```
+```commandline
+redis-cli
+```
+```commandline
+redis-server
+```
+```commandline
+pip install django-redis
+```
 # Run Project
 **Windows:**
 
