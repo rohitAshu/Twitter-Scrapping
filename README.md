@@ -32,8 +32,7 @@ Fetch comments associated with specific posts using their unique post IDs. This 
 ### Python Installation Process
 Before proceeding, ensure Python is installed on your system. If not, you can download and install Python from [python.org](https://www.python.org/downloads/).
 
-### Setting up a Virtual Environment
-To work with Django, it's recommended to create a virtual environment. Follow the steps outlined in the [Python documentation](https://docs.python.org/3/tutorial/venv.html) or use tools like `virtualenv` or `venv`.
+
 
 ### Installing Django
 Once the virtual environment is set up, you can install Django within it. Refer to the [Django documentation](https://docs.djangoproject.com/en/stable/intro/install/) for detailed instructions on installing Django.
@@ -49,6 +48,25 @@ git clone https://github.com/exoticaitsolutions/Twitter-Scrapping
 
 ```bash
   cd Twitter-Scrapping
+```
+### Setting up a Virtual Environment
+To work with Django, it's recommended to create a virtual environment. Follow the steps outlined in the [Python documentation](https://docs.python.org/3/tutorial/venv.html) or use tools like `virtualenv` or `venv`.
+Windows:
+```
+py -m venv myworld
+```
+Unix/MacOS:
+```
+ python3 -m venv myworld
+```
+Then you have to activate the environment, by typing this command:
+Windows:
+```
+myworld\Scripts\activate.bat
+```
+Unix/MacOS:
+```
+source myworld/bin/activate
 ```
 
 # Install Dependencies
@@ -121,8 +139,16 @@ PROXY_PASSWORD = PROXY_PASSWORD
 * Ensure that the version of Chromedriver matches the version of Google Chrome installed on your system for proper functionality.
 
 # Run Project
+**Windows:**
+
 ```bash
 python manage.py runserver
+```
+
+**Unix/MacOS/LLinux:**
+
+```bash
+python3 manage.py runserver
 ```
 
 
