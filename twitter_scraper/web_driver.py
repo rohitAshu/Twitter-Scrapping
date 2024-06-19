@@ -52,7 +52,7 @@ class InitializeDriver:
         Initializes WebDriver with paid proxy settings using Selenium Wire for request interception.
 
         Returns:
-            seleniumwire.webdriver.Chrome: Initialized WebDriver instance with paid proxy settings.
+            selenium wire.webdriver.Chrome: Initialized WebDriver instance with paid proxy settings.
         """
         options = self._setup_options()
         proxy_host = settings.PROXY_HOST

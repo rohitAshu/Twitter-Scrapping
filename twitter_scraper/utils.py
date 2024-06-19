@@ -1,10 +1,12 @@
 import os
 import json
 import random
+import threading
 from time import sleep
 from typing import Optional, Dict
 
 from django.http import JsonResponse
+from rest_framework import status
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
@@ -237,7 +239,7 @@ def twitter_login_auth(driver):
         print("Code input box found for authentication")
         # Get verification code from Mailinator
         code = get_mailinator_code(email)
-        code_input_box.send_keys(code) # Enter the verification code
+        code_input_box.send_keys(code)  # Enter the verification code
         random_sleep()
         print("confirmation code writen")
         # Click the next button to proceed with authentication
@@ -249,7 +251,7 @@ def twitter_login_auth(driver):
         # If code input box is not found, handle the scenario where email input box is displayed for authentication
         email_input_box = driver.find_element(By.XPATH, "//input[@inputmode='email']")
         print("Email input box found for authentication")
-        email_input_box.send_keys(email)# Enter the email address
+        email_input_box.send_keys(email)  # Enter the email address
         random_sleep()
         next_button_click = driver.find_element(
             By.XPATH, "//div[@class='css-175oi2r r-b9tw7p']//button"
@@ -261,7 +263,7 @@ def twitter_login_auth(driver):
 
 
 def message_json_response(
-    code: int, error_type: str, error_message: str, data: Optional[Dict] = None
+        code: int, error_type: str, error_message: str, data: Optional[Dict] = None
 ) -> JsonResponse:
     """
     Create a JSON response with the provided code, error type, error message, and optional data.
@@ -306,3 +308,15 @@ def save_data_in_directory(folder_name, file_name, json_data: dict):
     with open(file_path, "w", encoding="utf-8") as f:
         json.dump(json_data, f, ensure_ascii=False, indent=4)
     return True
+
+
+
+
+
+def tweet_content_exists(tweets, tweet_content):
+    return any(tweet.get("TweetContent") == tweet_content for tweet in tweets)
+
+
+
+
+
