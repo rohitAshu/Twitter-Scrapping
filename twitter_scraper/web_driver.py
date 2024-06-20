@@ -7,6 +7,7 @@ from seleniumwire import webdriver as wiredriver
 from webdriver_manager.chrome import ChromeDriverManager
 import requests
 
+
 class InitializeDriver:
     """
     A class to initialize WebDriver instances for different proxy configurations.
@@ -100,6 +101,7 @@ def create_webdriver_instance():
     else:
         raise Exception(response.json()['error'])
 
+
 def get_webdriver():
     response = requests.get(f'{CLOUDFLARE_WORKER_URL}/get')
     if response.status_code == 200:
@@ -109,11 +111,13 @@ def get_webdriver():
     else:
         raise Exception(response.json()['error'])
 
+
 def release_webdriver(driver):
     instance_data = {'executor_url': driver.command_executor._url}
     response = requests.post(f'{CLOUDFLARE_WORKER_URL}/release', json=instance_data)
     driver.quit()
     return response.json()
+
 
 def close_webdriver_instance(instance_data):
     response = requests.post(f'{CLOUDFLARE_WORKER_URL}/close', json=instance_data)
