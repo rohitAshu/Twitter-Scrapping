@@ -1,10 +1,12 @@
 import threading
 from concurrent.futures import ThreadPoolExecutor
 from time import sleep
-
+# Cloudflare configuration....
+import requests
 from django.conf import settings
-from django.core.cache import cache
+from django.http import JsonResponse
 from django.utils import timezone
+from django.views.decorators.http import require_http_methods
 from rest_framework import status
 from rest_framework.decorators import api_view
 from selenium.common.exceptions import (
@@ -26,20 +28,13 @@ from .utils import (
 )
 from .web_driver import InitializeDriver
 
-## Cloudflare configuration....
-import requests
-from .web_driver import InitializeDriver
-from django.conf import settings
-from django.http import JsonResponse
-from django.views.decorators.http import require_http_methods
-
 CLOUDFLARE_WORKER_URL = 'https://<your-cloudflare-worker-url>'
 ##################################################################
 
 MAX_THREAD_COUNT = 5
 MAX_EXCEPTION_RETRIES = 3
 NUMBER_OF_POSTS = 1
-CACHE_TIMEOUT=60 * 15
+CACHE_TIMEOUT = 60 * 15
 
 driver_initializer = InitializeDriver()
 
@@ -55,7 +50,8 @@ def retry_exception(recalling_method_name, any_generic_parameter, retry_count=0,
         retry_count = retry_count + 1
         # Retry the function after a delay
         print(
-            f"******* Retrying attempt after ',{exception_name} in {recalling_method_name},' , Attempt #:' {retry_count}")
+            f"******* Retrying attempt after ',{exception_name} in {recalling_method_name},' "
+            f", Attempt #:' {retry_count}")
         random_sleep()  # Add a delay before retrying
         return recalling_method_name(any_generic_parameter, retry_count)
     else:
@@ -154,13 +150,15 @@ def scrape_profile_tweets(profile_name=None, retry_count=0, full_url=None):
             ec.presence_of_element_located(
                 (
                     By.XPATH,
-                    "//*[@id='react-root']/div/div/div[2]/main/div/div/div/div[1]/div/div[3]/section/div/div/div[1]/div/div/button/div/div[2]/div[1]/div[1]/div/div[1]/a/div/div[1]/span/span[1]",
+                    "//*[@id='react-root']/div/div/div[2]/main/div/div/div/div[1]/div/div[3]/section/div/div/div["
+                    "1]/div/div/button/div/div[2]/div[1]/div[1]/div/div[1]/a/div/div[1]/span/span[1]",
                 )
             )
         )
         profile = driver.find_element(
             By.XPATH,
-            "//*[@id='react-root']/div/div/div[2]/main/div/div/div/div[1]/div/div[3]/section/div/div/div[1]/div/div/button/div/div[2]/div[1]/div[1]/div/div[1]/a/div/div[1]/span/span[1]",
+            "//*[@id='react-root']/div/div/div[2]/main/div/div/div/div[1]/div/div[3]/section/div/div/div["
+            "1]/div/div/button/div/div[2]/div[1]/div[1]/div/div[1]/a/div/div[1]/span/span[1]",
         )
         print('profile element is found')
         profile.click()
@@ -337,7 +335,8 @@ def scrape_trending_hashtags(trending, retry_count=0, full_url=None):
         random_sleep()
         trending_btn = driver.find_element(
             By.XPATH,
-            "/html/body/div[1]/div/div/div[2]/main/div/div/div/div[1]/div/div[1]/div[1]/div[2]/nav/div/div[2]/div/div[2]/a/div/div/span",
+            "/html/body/div[1]/div/div/div[2]/main/div/div/div/div[1]/div/div[1]/div[1]/div[2]/nav/div/div["
+            "2]/div/div[2]/a/div/div/span",
         )
         print("trending element is found")
         trending_btn.click()
@@ -547,6 +546,9 @@ def scrap_get_comments_for_tweet(request, retry_count=0, full_url=None):
     success, message = twitter_login_auth(driver)
     if not success:
         return success, message
+
+    json_response = {"comments": []}  # Initialize json_response with a default empty list
+
     try:
         data = []
         user_name = request.query_params.get("user_name")
@@ -554,15 +556,18 @@ def scrap_get_comments_for_tweet(request, retry_count=0, full_url=None):
         print("post_ids_str", post_ids_str)
         post_ids = post_ids_str.split(",")
         post_ids = [post_id.strip() for post_id in post_ids]
+
         for post_id in post_ids:
             twitter_url = f"https://x.com/{user_name}/status/{post_id}"
             print('twitter url ', twitter_url)
             driver.get(twitter_url)
             print('getting the data')
             random_sleep()
+
             WebDriverWait(driver, 15).until(
                 ec.presence_of_element_located((By.XPATH, "//*[@role='article']"))
             )
+
             while len(data) < NUMBER_OF_POSTS:
                 driver.execute_script("window.scrollBy(0, 200);")
                 sleep(5)
@@ -573,49 +578,52 @@ def scrap_get_comments_for_tweet(request, retry_count=0, full_url=None):
                     comment_text = element.text.strip()
                     if comment_text and {"comment": comment_text} not in data:
                         data.append({"comment": comment_text})
+
         if data:
             formatted_comments = []
             for item in data:
                 comment_text = item["comment"].split("\n")
                 try:
                     if len(comment_text) >= 8:
-                        if len(comment_text) >= 8:
-                            name = comment_text[0]
-                            username = comment_text[1]
-                            time = comment_text[3]
-                            comment = comment_text[4]
-                            likes = comment_text[5].split()[0]
-                            views = comment_text[7]
+                        name = comment_text[0]
+                        username = comment_text[1]
+                        time = comment_text[3]
+                        comment = comment_text[4]
+                        likes = comment_text[5].split()[0]
+                        views = comment_text[7]
 
-                            formatted_comment = {
-                                "Name": name,
-                                "Username": username,
-                                "Time": time,
-                                "Comment": comment,
-                                "Likes": likes,
-                                "Views": views,
-                            }
+                        formatted_comment = {
+                            "Name": name,
+                            "Username": username,
+                            "Time": time,
+                            "Comment": comment,
+                            "Likes": likes,
+                            "Views": views,
+                        }
 
-                            formatted_comments.append(formatted_comment)
+                        formatted_comments.append(formatted_comment)
                     else:
-                        print(
-                            f"Skipping item due to insufficient data: {item['comment']}"
-                        )
+                        print(f"Skipping item due to insufficient data: {item['comment']}")
                 except IndexError as e:
                     print(f"Error processing item: {item['comment']}. Error: {str(e)}")
+
             json_response = {"comments": formatted_comments}
-            # cache.set(f"comments {user_name}", json_response, timeout=60 * 15)
             set_cache(full_url, json_response, timeout=CACHE_TIMEOUT)
+
     except NoSuchElementException as e:
         if 'driver' in locals():
             driver.quit()
         return retry_exception(scrap_get_comments_for_tweet, request, retry_count, type(e).__name__)
+
     except StaleElementReferenceException as ex:
         if 'driver' in locals():
             driver.quit()
         return retry_exception(scrap_get_comments_for_tweet, request, retry_count, type(ex).__name__)
-    if 'driver' in locals():
-        driver.quit()
+
+    finally:
+        if 'driver' in locals():
+            driver.quit()
+
     return True, json_response
 
 
@@ -624,7 +632,6 @@ def get_comments_for_tweets(request):
     user_name = request.query_params.get("user_name")
     post_ids_str = request.query_params.get("post_ids")
     full_url = request.build_absolute_uri()
-    data_ = f"comments {user_name}";
     if not (user_name and post_ids_str):
         return message_json_response(
             status.HTTP_400_BAD_REQUEST, "error", "Both user_name and post_ids are required."
@@ -646,23 +653,26 @@ def get_comments_for_tweets(request):
                                  data=result)
 
 
-##Cloudflare configuration......
+# Cloudflare configuration......
 @require_http_methods(["POST"])
 def create_instance(request):
     instance_data = request.POST.get('instance_data')
     response = requests.post(f'{CLOUDFLARE_WORKER_URL}/create', json={'instance': instance_data})
     return JsonResponse(response.json(), status=response.status_code)
 
+
 @require_http_methods(["GET"])
 def get_instance(request):
-    response = requests.get(f'{CLOUDFLARE_WORKER_URL}/get')
+    response = requests.get(f'{settings.CLOUDFLARE_WORKER_URL}/get')
     return JsonResponse(response.json(), status=response.status_code)
+
 
 @require_http_methods(["POST"])
 def release_instance(request):
     instance_data = request.POST.get('instance_data')
     response = requests.post(f'{CLOUDFLARE_WORKER_URL}/release', json={'instance': instance_data})
     return JsonResponse(response.json(), status=response.status_code)
+
 
 @require_http_methods(["POST"])
 def close_instance(request):

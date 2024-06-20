@@ -1,19 +1,16 @@
-import os
 import json
+import os
 import random
-import threading
 from time import sleep
 from typing import Optional, Dict
-
-from django.http import JsonResponse
-from rest_framework import status
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.common.exceptions import NoSuchElementException
 import undetected_chromedriver as uc
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from django.core.cache import cache
+from django.http import JsonResponse
+from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.by import By
+
 
 def get_mailinator_code(email):
     username = email.split("@")[0]
@@ -310,23 +307,20 @@ def save_data_in_directory(folder_name, file_name, json_data: dict):
     return True
 
 
-
-
-
 def tweet_content_exists(tweets, tweet_content):
     return any(tweet.get("TweetContent") == tweet_content for tweet in tweets)
-
 
 
 def set_cache(key, value, timeout=None):
     """
     Set a value in the cache.
+    :param timeout:
     :param key: Cache key
-    :param value: Value to cache
-    :param timeout: Cache timeout in seconds. Defaults to the default timeout if None.
+    :param value: Value to cache    :param timeout:  timeout in seconds. Defaults to the default timeout if None.
     """
-    print("Setting the key = ",key," and value = ",value," for timeout = ",timeout," in Redis cache.")
+    print("Setting the key = ", key, " and value = ", value, " for timeout = ", timeout, " in Redis cache.")
     cache.set(key, value, timeout)
+
 
 def get_cache(key, default=None):
     """
@@ -336,4 +330,3 @@ def get_cache(key, default=None):
     :return: Cached value or default if the key does not exist
     """
     return cache.get(key, default)
-
