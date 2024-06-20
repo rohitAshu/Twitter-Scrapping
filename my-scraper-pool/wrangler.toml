@@ -1,0 +1,14 @@
+name = "my-scraper-pool"
+main = "src/index.js"  # Specify the entry point script
+account_id = "7d986201d17ec3d24f17f69201e40f75"
+workers_dev = true
+compatibility_date = "2023-01-01"
+
+[durable_objects]
+bindings = [
+  { name = "SCRAPER_POOL", class_name = "ScraperPool" }
+]
+
+[[migrations]]
+tag = "v1"  # Unique tag for this migration
+new_classes = ["ScraperPool"]

@@ -22,12 +22,24 @@ from .utils import (
     message_json_response,
     save_data_in_directory,
     random_sleep, tweet_content_exists,
+    set_cache, get_cache,
 )
 from .web_driver import InitializeDriver
+
+## Cloudflare configuration....
+import requests
+from .web_driver import InitializeDriver
+from django.conf import settings
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+
+CLOUDFLARE_WORKER_URL = 'https://<your-cloudflare-worker-url>'
+##################################################################
 
 MAX_THREAD_COUNT = 5
 MAX_EXCEPTION_RETRIES = 3
 NUMBER_OF_POSTS = 1
+CACHE_TIMEOUT=60 * 15
 
 driver_initializer = InitializeDriver()
 
@@ -52,7 +64,7 @@ def retry_exception(recalling_method_name, any_generic_parameter, retry_count=0,
         return False, "Element not found"
 
 
-def scrape_profile_tweets(profile_name=None, retry_count=0):
+def scrape_profile_tweets(profile_name=None, retry_count=0, full_url=None):
     print_current_thread()
     print('web driver initializing')
     driver = (
@@ -155,7 +167,8 @@ def scrape_profile_tweets(profile_name=None, retry_count=0):
         print("click on people profile !!!!!!!!!!!!!!!!!!")
         random_sleep()
         json_response = scrap_data()
-        cache.set(profile_name, json_response, timeout=60 * 15)
+        # cache.set(profile_name, json_response, timeout=60 * 15)
+        set_cache(full_url, json_response, timeout=CACHE_TIMEOUT)
     except NoSuchElementException as e:
         if 'driver' in locals():
             driver.quit()
@@ -172,16 +185,18 @@ def scrape_profile_tweets(profile_name=None, retry_count=0):
 @api_view(["GET"])
 def get_tweeted_via_profile_name(request):
     profile_name = request.query_params.get("Profile_name")
+    full_url = request.build_absolute_uri()
     if not profile_name:
         return message_json_response(
             status.HTTP_400_BAD_REQUEST, "success", "Profile_name is required"
         )
-    cached_response = cache.get(profile_name)
+    # cached_response = cache.get(profile_name)
+    cached_response = get_cache(full_url)
     if cached_response:
         return message_json_response(status.HTTP_200_OK, "success", "Tweets retrieved successfully",
                                      data=cached_response)
     with ThreadPoolExecutor(max_workers=MAX_THREAD_COUNT) as executor:
-        future = executor.submit(scrape_profile_tweets, profile_name, 0)
+        future = executor.submit(scrape_profile_tweets, profile_name, 0, full_url)
         success, result = future.result()
     if not success:
         return message_json_response(
@@ -192,7 +207,7 @@ def get_tweeted_via_profile_name(request):
                                  data=result)
 
 
-def scrape_hashtag_tweets(hashtags, retry_count):
+def scrape_hashtag_tweets(hashtags, retry_count, full_url):
     print_current_thread()
     print('web driver initializing')
     driver = (
@@ -260,7 +275,8 @@ def scrape_hashtag_tweets(hashtags, retry_count):
         print(f'enter the search with value {hashtags}')
         random_sleep()
         json_response = scrap_data()
-        cache.set(hashtags, json_response, timeout=60 * 15)
+        # cache.set(hashtags, json_response, timeout=60 * 15)
+        set_cache(full_url, json_response, timeout=CACHE_TIMEOUT)
     except NoSuchElementException as e:
         if 'driver' in locals():
             driver.quit()
@@ -274,19 +290,21 @@ def scrape_hashtag_tweets(hashtags, retry_count):
     return True, json_response
 
 
-@api_view(["get"])
+@api_view(["GET"])
 def fetch_tweets_by_hash_tag(request):
     hashtags = request.query_params.get("hashtags")
+    full_url = request.build_absolute_uri()
     if not hashtags:
         return message_json_response(
             status.HTTP_400_BAD_REQUEST, "success", "hashtags is required"
         )
-    cached_response = cache.get(hashtags)
+    # cached_response = cache.get(hashtags)
+    cached_response = get_cache(full_url)
     if cached_response:
         return message_json_response(status.HTTP_200_OK, "success", "Tweets retrieved successfully",
                                      data=cached_response)
     with ThreadPoolExecutor(max_workers=MAX_THREAD_COUNT) as executor:
-        future = executor.submit(scrape_hashtag_tweets, hashtags, 0)
+        future = executor.submit(scrape_hashtag_tweets, hashtags, 0, full_url)
         success, result = future.result()
     if not success:
         return message_json_response(
@@ -297,7 +315,7 @@ def fetch_tweets_by_hash_tag(request):
                                  data=result)
 
 
-def scrape_trending_hashtags(trending, retry_count=0):
+def scrape_trending_hashtags(trending, retry_count=0, full_url=None):
     print_current_thread()
     print('web driver initializing')
     driver = (
@@ -358,7 +376,8 @@ def scrape_trending_hashtags(trending, retry_count=0):
                 }
                 trending_topics.append(item)
         json_response = trending_topics
-        cache.set(trending, json_response, timeout=60 * 15)
+        # cache.set(trending, json_response, timeout=60 * 15)
+        set_cache(full_url, json_response, timeout=CACHE_TIMEOUT)
     except NoSuchElementException as e:
         if 'driver' in locals():
             driver.quit()
@@ -375,12 +394,14 @@ def scrape_trending_hashtags(trending, retry_count=0):
 @api_view(["GET"])
 def get_trending_tweets(request):
     trending = "trending"
-    cached_response = cache.get(trending)
+    # cached_response = cache.get(trending)
+    full_url = request.build_absolute_uri()
+    cached_response = get_cache(full_url)
     if cached_response:
         return message_json_response(status.HTTP_200_OK, "success", "Tweets retrieved successfully",
                                      data=cached_response)
     with ThreadPoolExecutor(max_workers=5) as executor:
-        future = executor.submit(scrape_trending_hashtags, trending, 0)
+        future = executor.submit(scrape_trending_hashtags, trending, 0, full_url)
         success, result = future.result()
     if not success:
         return message_json_response(
@@ -391,7 +412,7 @@ def get_trending_tweets(request):
                                  data=result)
 
 
-def scrape_tweets_by_id(request, retry_count=0):
+def scrape_tweets_by_id(request, retry_count=0, full_url=None):
     print_current_thread()
     print('web driver initializing')
     driver = (
@@ -474,7 +495,8 @@ def scrape_tweets_by_id(request, retry_count=0):
                 }
             )
             print("scrapping !!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-        cache.set(f"get_by_id {user_name}", data, timeout=60 * 15)
+        # cache.set(f"get_by_id {user_name}", data, timeout=60 * 15)
+        set_cache(full_url, data, timeout=CACHE_TIMEOUT)
     except NoSuchElementException as e:
         if 'driver' in locals():
             driver.quit()
@@ -488,20 +510,22 @@ def scrape_tweets_by_id(request, retry_count=0):
     return True, data
 
 
-@api_view(["get"])
+@api_view(["GET"])
 def get_tweets_by_id(request):
     user_name = request.query_params.get("user_name")
+    full_url = request.build_absolute_uri()
     post_ids_str = request.query_params.get("post_ids")
     if not (user_name and post_ids_str):
         return message_json_response(
             status.HTTP_400_BAD_REQUEST, "error", "Both user_name and post_ids are required."
         )
-    cached_response = cache.get(f"get_by_id {user_name}")
+    # cached_response = cache.get(f"get_by_id {user_name}")
+    cached_response = get_cache(full_url)
     if cached_response:
         return message_json_response(status.HTTP_200_OK, "success", "Tweets retrieved successfully",
                                      data=cached_response)
     with ThreadPoolExecutor(max_workers=5) as executor:
-        future = executor.submit(scrape_tweets_by_id, request, 0)
+        future = executor.submit(scrape_tweets_by_id, request, 0, full_url)
         success, result = future.result()
     if not success:
         return message_json_response(
@@ -512,7 +536,7 @@ def get_tweets_by_id(request):
                                  data=result)
 
 
-def scrap_get_comments_for_tweet(request, retry_count=0):
+def scrap_get_comments_for_tweet(request, retry_count=0, full_url=None):
     print_current_thread()
     print('web driver initializing')
     driver = (
@@ -580,7 +604,8 @@ def scrap_get_comments_for_tweet(request, retry_count=0):
                 except IndexError as e:
                     print(f"Error processing item: {item['comment']}. Error: {str(e)}")
             json_response = {"comments": formatted_comments}
-            cache.set(f"comments {user_name}", json_response, timeout=60 * 15)
+            # cache.set(f"comments {user_name}", json_response, timeout=60 * 15)
+            set_cache(full_url, json_response, timeout=CACHE_TIMEOUT)
     except NoSuchElementException as e:
         if 'driver' in locals():
             driver.quit()
@@ -598,17 +623,19 @@ def scrap_get_comments_for_tweet(request, retry_count=0):
 def get_comments_for_tweets(request):
     user_name = request.query_params.get("user_name")
     post_ids_str = request.query_params.get("post_ids")
+    full_url = request.build_absolute_uri()
     data_ = f"comments {user_name}";
     if not (user_name and post_ids_str):
         return message_json_response(
             status.HTTP_400_BAD_REQUEST, "error", "Both user_name and post_ids are required."
         )
-    cached_response = cache.get(data_)
+    # cached_response = cache.get(data_)
+    cached_response = get_cache(full_url)
     if cached_response:
         return message_json_response(status.HTTP_200_OK, "success", "Tweets retrieved successfully",
                                      data=cached_response)
     with ThreadPoolExecutor(max_workers=5) as executor:
-        future = executor.submit(scrap_get_comments_for_tweet, request, 0)
+        future = executor.submit(scrap_get_comments_for_tweet, request, 0, full_url)
         success, result = future.result()
     if not success:
         return message_json_response(
@@ -617,3 +644,28 @@ def get_comments_for_tweets(request):
     save_data_in_directory(f"json_response/{timezone.now().date()}/", user_name, result)
     return message_json_response(status.HTTP_200_OK, "success", "Tweets retrieved successfully",
                                  data=result)
+
+
+##Cloudflare configuration......
+@require_http_methods(["POST"])
+def create_instance(request):
+    instance_data = request.POST.get('instance_data')
+    response = requests.post(f'{CLOUDFLARE_WORKER_URL}/create', json={'instance': instance_data})
+    return JsonResponse(response.json(), status=response.status_code)
+
+@require_http_methods(["GET"])
+def get_instance(request):
+    response = requests.get(f'{CLOUDFLARE_WORKER_URL}/get')
+    return JsonResponse(response.json(), status=response.status_code)
+
+@require_http_methods(["POST"])
+def release_instance(request):
+    instance_data = request.POST.get('instance_data')
+    response = requests.post(f'{CLOUDFLARE_WORKER_URL}/release', json={'instance': instance_data})
+    return JsonResponse(response.json(), status=response.status_code)
+
+@require_http_methods(["POST"])
+def close_instance(request):
+    instance_data = request.POST.get('instance_data')
+    response = requests.post(f'{CLOUDFLARE_WORKER_URL}/close', json={'instance': instance_data})
+    return JsonResponse(response.json(), status=response.status_code)
