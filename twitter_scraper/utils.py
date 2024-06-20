@@ -27,7 +27,7 @@ def get_mailinator_code(email):
     try:
         sleep(3)
         # Click the email item
-        outer_click = driver.find_element(
+        driver.find_element(
             By.XPATH,
             "/html/body/div/main/div[2]/div[3]/div/div[4]/div/div/table/tbody/tr/td[3]",
         ).click()
@@ -61,12 +61,12 @@ def get_mailinator_code(email):
 
 
 USER_CREDENTIALS = [
-    {
-        "full name": "MosleySeri72159",
-        "username": "MosleySeri72159",
-        "email": "xohik@mailinator.com",
-        "password": "asdf123@",
-    },
+    # {
+    #     "full name": "MosleySeri72159",
+    #     "username": "MosleySeri72159",
+    #     "email": "xohik@mailinator.com",
+    #     "password": "asdf123@",
+    # },
     {
         "full name": "Melvin Barber",
         "username": "MelvinBarb10693",
@@ -168,11 +168,6 @@ def type_slowly(element, text, delay=0.1):
 
     Returns:
         None
-
-    Example:
-        Assuming `element` is a Selenium WebElement representing a text input field:
-        >>> type_slowly(element, "Hello, world!", delay=0.05)
-        # This would type "Hello, world!" into the text input field, with a delay of 0.05 seconds between each character.
     """
     for char in text:
         element.send_keys(char)
@@ -198,7 +193,7 @@ def twitter_login_auth(driver):
     email = credentials["email"]
     print("email : ", email)
     driver.get("https://twitter.com/i/flow/login")
-    sleep(10)
+    random_sleep()
     try:
         username = driver.find_element(By.XPATH, "//input[@name='text']")
         actions = ActionChains(driver)
@@ -212,7 +207,7 @@ def twitter_login_auth(driver):
         next_button = driver.find_element(By.XPATH, "//span[contains(text(),'Next')]")
         actions.move_to_element(next_button).click().perform()
         print("Next button element found and clicked successfully.")
-        sleep(10)
+        random_sleep()
     except NoSuchElementException:
         return False, "Next button element not found"
 
@@ -222,6 +217,7 @@ def twitter_login_auth(driver):
         actions.move_to_element(password).click().perform()
         type_slowly(password, password_value)
         print("Password element found and value sent successfully.")
+        random_sleep()
     except NoSuchElementException:
         return False, "Password element not found"
 
@@ -240,7 +236,7 @@ def twitter_login_auth(driver):
         random_sleep()
         print("confirmation code writen")
         # Click the next button to proceed with authentication
-        next_button_click = driver.find_element(
+        driver.find_element(
             By.XPATH, "//div[@class='css-175oi2r r-b9tw7p']//button"
         ).click()
         random_sleep()
@@ -250,7 +246,7 @@ def twitter_login_auth(driver):
         print("Email input box found for authentication")
         email_input_box.send_keys(email)  # Enter the email address
         random_sleep()
-        next_button_click = driver.find_element(
+        driver.find_element(
             By.XPATH, "//div[@class='css-175oi2r r-b9tw7p']//button"
         ).click()
         random_sleep()
