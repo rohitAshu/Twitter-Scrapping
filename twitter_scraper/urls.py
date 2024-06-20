@@ -3,7 +3,7 @@ from . import views
 
 urlpatterns = [
     path(
-        "v1/twitter/tweets/profile",
+        "v1/twitter/tweets/profile/",
         views.get_tweeted_via_profile_name,
         name="get_Tweeted_via_profile_name",
     ),
