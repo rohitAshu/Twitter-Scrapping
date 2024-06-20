@@ -1,94 +1,166 @@
-# Twitter Scrapping Rest APIs
+# Project Name
+## Social Media Scrapping
+* This project focuses on creating a comprehensive tool for scraping data from various social media platforms such as Instagram, Twitter, and Facebook using Python and Django. The tool will allow users to gather and analyze social media data efficiently.
+### Overview
+* The Social Media Scraping Tool is designed to extract data from multiple social media platforms. This document details the module specifically for Twitter scraping, outlining the available APIs and their functionalities.
 
-To run this project, you will need to add the following environment variables to your .env file
-`API_KEY` : http://127.0.0.1:8000/api
-Database Details
+## Module Name 
+### Twitter Scrapper
+* The Twitter Scraper module provides APIs to scrape data from Twitter using various approaches, such as profile names, hashtags, trending topics, and post IDs.
+### APIs
 
-## Run Locally
+***Profile Data Scraping***-
+Retrieve detailed information about Twitter profiles using profile names. This API enables users to gather comprehensive data on specific Twitter profiles.
 
-Clone the project
+***Trending Hashtags Scraping***-
+Extract the latest trending hashtags on Twitter to stay updated with current trends.
 
+***Hashtag-based Data Scraping***-
+Collect tweets and associated data by searching specific hashtags. This API enables users to gather tweets related to specific topics of interest.
+
+***Scraping Using Post-Ids*** -
+Fetch information about specific posts using their unique post IDs. This API provides detailed data on individual Twitter posts.
+
+***Scraping Post Comments***-
+Fetch comments associated with specific posts using their unique post IDs. This API allows users to collect and analyze comments on specific Twitter posts.
+
+
+# Setup Instructions
+
+## Installation
+
+### Python Installation Process
+Before proceeding, ensure Python is installed on your system. If not, you can download and install Python from [python.org](https://www.python.org/downloads/).
+
+
+
+### Installing Django
+Once the virtual environment is set up, you can install Django within it. Refer to the [Django documentation](https://docs.djangoproject.com/en/stable/intro/install/) for detailed instructions on installing Django.
+
+## Getting Started
+
+### Clone the Project
 ```bash
-  git clone https://github.com/exoticaitsolutions/Twitter-Scrapping
+git clone https://github.com/exoticaitsolutions/Twitter-Scrapping
 ```
 
-Go to the project directory
+## Navigate to the Project Directory
 
 ```bash
-  cd ssapi
+  cd Twitter-Scrapping
 ```
-
-
-Create Virtual Environment
-
+### Setting up a Virtual Environment
+To work with Django, it's recommended to create a virtual environment. Follow the steps outlined in the [Python documentation](https://docs.python.org/3/tutorial/venv.html) or use tools like `virtualenv` or `venv`.
 Windows:
-
-```bash
-py -m venv env
 ```
-
-Unix/MacOS/Linux:
-
-```bash
-sudo python3 -m venv env
+py -m venv myworld
 ```
-
+Unix/MacOS:
+```
+ python3 -m venv myworld
+```
 Then you have to activate the environment, by typing this command:
-
 Windows:
-
-```bash
-env\Scripts\activate.bat
+```
+myworld\Scripts\activate.bat
+```
+Unix/MacOS:
+```
+source myworld/bin/activate
 ```
 
-Unix/MacOS/LLinux:
-
-```bash
-source env/bin/activate
+# Install Dependencies
+### Using requirements.txt
+```
+pip install -r requirements.txt
 ```
 
-Install dependencies
+# Individual Dependencies
 
-```bash
-  pip install -r requirements.txt
-```python manage.py runserver
-
-Then After make a make migrate using the following commandpython manage.py runserver
-
-Windows:
-
-```bash
-python manage.py makemigrations api
+***Core Headers***
+```
+pip install django-cors-headers
+```
+***blinker***
+```
+pip install blinker==1.7.0
+```
+**Undetected Chromedriver**
+```
+pip install undetected-chromedriver
+```
+***Selenium***
+```
+pip install selenium
+```
+***Fake Useragent***
+```
+pip install fake-useragent
 ```
 
-Unix/MacOS/Linux:
-
-```bash
-python3 manage.py makemigrations
+***Setuptools***
+```
+python -m pip install --upgrade pip setuptools
+```
+***Wbdriver Manager***
+```
+pip install webdriver-manager
+```
+***selenium-wire***
+```
+pip install selenium-wire
 ```
 
-Then run the migrate command to create the tables in the database
-
-Windows:
-
-```bash
-python manage.py migrate
-
+***python-dotenv***
+```
+pip install python-dotenv
 ```
 
-Unix/MacOS/LInux:
-
-```bash
-python3 manage.py migrate
+## Environment Variables
+ To run this project, you will need to add the following environment variables to your .env file
+# Create .env file
+in linux
 ```
-
-Start the server
-
+touch .env
+```
+in window 
+```
+type nul > .env
+```
+## Setup .env File 
+```
+PAIDPROXY = FALSE
+PROXY_HOST = PROXY_HOST
+PROXY_PORT = PROXY_PORT
+PROXY_USERNAME = PROXY_USERNAME
+PROXY_PASSWORD = PROXY_PASSWORD
+```
+## Chromedriver
+* Ensure that the version of Chromedriver matches the version of Google Chrome installed on your system for proper functionality.
+# Redish
+```
+sudo apt install redis-server
+```
+```commandline
+sudo apt install redis-tools
+```
+```commandline
+redis-cli ping
+```
+```commandline
+redis-cli
+```
+```commandline
+redis-server
+```
+```commandline
+pip install django-redis
+```
+# Run Project
 **Windows:**
 
 ```bash
 python manage.py runserver
-
 ```
 
 **Unix/MacOS/LLinux:**
@@ -96,4 +168,5 @@ python manage.py runserver
 ```bash
 python3 manage.py runserver
 ```
+
 
